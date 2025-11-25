@@ -72,6 +72,10 @@ class signal {
                 validateInstance := this.type[1].new(item is Struct.StructInstance ? item.mapify() : item)
                 validateInstance := ""
             }
+        } else if (this.type is Array) {
+            if (!ArrayExt.find(this.type, item => item = newSignalValue)) {
+                throw ValueError("Type mismatch.`n`nAssignable: " . JSON.stringify(this.type, 0), -1, this.value)
+            }
         } else if (this.type != "") {
             TypeChecker.checkType(newSignalValue, this.type)
         }
@@ -193,7 +197,12 @@ class signal {
                 validateInstance := this.type[1].new(item is Struct.StructInstance ? item.mapify() : item)
                 validateInstance := ""
             }
-        } else {
+        } else if (datatype is Array) {
+            if (!ArrayExt.find(datatype, t => t == this.value)) {
+                throw ValueError("Type mismatch.`n`nAssignable: " . JSON.stringify(datatype, 0), -1, this.value)
+            }
+        }
+         else {
             TypeChecker.checkType(this.value, datatype)
         }
 
