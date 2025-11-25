@@ -1,10 +1,10 @@
-; ; components
+; components
 #Include "./dynamic.ahk"
 #Include "./indexlist.ahk"
 #Include "./show.ahk"
 #Include "./stackbox.ahk"
 
-; ; functions
+; functions
 #Include "./shareCheckStatus.ahk"
 #Include "./useListPlaceholder.ahk"
 #Include "./useImages.ahk"
@@ -14,7 +14,7 @@
 #Include "./unpack.ahk"
 #Include "./pipe.ahk"
 
-; ; classes
+; classes
 #Include "./orderedmap.ahk"
 #Include "./struct.ahk"
 #Include "./general-tree.ahk"
