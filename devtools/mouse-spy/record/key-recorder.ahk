@@ -1,7 +1,7 @@
 /**
  * @typedef {Object} ReplaceSleep
- * @property {Func} isReplace
- * @property {Func} stepFiller
+ * @property {() => 1 | 0} isReplace
+ * @property {() => String} stepFiller
  */
 
 /**

@@ -3,7 +3,7 @@
 
 /**
  * @param {Svaner} App 
- * @param {String} config 
+ * @param {Map} config 
  */
 MouseSpy_Record(App, config) {
     curRecordMode := signal("clickStep", { name: "clickStep" })
