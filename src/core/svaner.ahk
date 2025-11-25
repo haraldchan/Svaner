@@ -52,9 +52,6 @@ class Svaner {
         this.optParser := OptionParser(this)
     }
 
-    Show(options := "") {
-        this.gui.Show(options)
-    }
 
     /**
      * 
@@ -86,6 +83,12 @@ class Svaner {
         }
     }
 
+
+    /**
+     * Parse options/directives to native options.
+     * @param {String} optionString 
+     * @returns {String} 
+     */
     __parseOptions(optionString) {
         parsed := ""
         splittedOptions := StrSplit(optionString, " ")
@@ -95,6 +98,52 @@ class Svaner {
         }
 
         return parsed
+    }
+
+    /**
+     * Apply custom directives to control.
+     * @param {Svaner.Control | Gui.Control} control 
+     * @param {String} options 
+     */
+    __applyCustomDirectives(control, options) {
+        loop parse options, " " {
+            if (this.optParser.directiveCallbacks.Has(A_LoopField)) {
+                this.optParser.directiveCallbacks[A_LoopField](control)
+            }
+        }
+    }
+
+
+    /**
+     * Sets various options and styles for the appearance and behavior of the gui window.
+     * @param {String} options options apply to the gui window.
+     */
+    Opt(options) {
+        this.gui.Opt(options)
+    }
+
+
+    /**
+     * Show Gui window.
+     * @param {String} options 
+     */
+    Show(options := "") => this.gui.Show(options)
+
+
+    /**
+     * Define custom directives.
+     * @param {Map<string, ()=>void>} directiveDescriptor 
+     */
+    defineDirectives(directiveDescriptor) {
+        for directive, optionsOrCallback in directiveDescriptor {
+            if (!StringExt.startsWith(directive, "@")) {
+                throw ValueError("Directive must starts with `"@`"", -1, directive)
+            }
+
+            StringExt.startsWith(directive, "@func:")
+                ? this.optParser.directiveCallbacks[directive] := optionsOrCallback
+                : this.optParser.directiveOptionMap[directive] := optionsOrCallback
+        }
     }
 
 
@@ -109,9 +158,12 @@ class Svaner {
     AddButton(options := "", content := "", depend?, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return IsSet(depend) && depend is signal
+        control := IsSet(depend) && depend is signal
             ? SvanerButton(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddButton(parsedOptions, content)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -126,9 +178,12 @@ class Svaner {
     AddCheckBox(options, content := "", depend?, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return IsSet(depend) && depend is signal
-            ? SvanerCheckBox(this.gui, options, content,  (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddCheckbox(options, content)
+        control :=  IsSet(depend) && depend is signal
+            ? SvanerCheckBox(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddCheckbox(parsedOptions, content)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -142,9 +197,12 @@ class Svaner {
     AddComboBox(options, dependOrList := [], key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return dependOrList is signal
+        control :=  dependOrList is signal
             ? SvanerComboBox(this.gui, parsedOptions, dependOrList, (IsSet(key) ? key : 0))
             : this.gui.AddComboBox(parsedOptions, dependOrList)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
     /**
@@ -156,7 +214,10 @@ class Svaner {
     AddDateTime(options, dateFormat := "ShortDate") {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddDateTime(parsedOptions, dateFormat)
+        control := this.gui.AddDateTime(parsedOptions, dateFormat)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -164,15 +225,18 @@ class Svaner {
      * 
      * @param options 
      * @param {signal | Array} dependOrList 
-     * @param {String | Array|Object} [key] the keys or index of the signal's value.
+     * @param {String | Array | Object} [key] the keys or index of the signal's value.
      * @returns {SvanerDropDownList | Gui.DDL} 
      */
     AddDropDownList(options, dependOrList, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return dependOrList is signal
+        control := dependOrList is signal
             ? SvanerDropDownList(this.gui, parsedOptions, dependOrList)
             : this.gui.AddDDL(parsedOptions, dependOrList)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
     AddDDL(options, dependOrList, key?) => this.AddDropDownList(options, dependOrList, (IsSet(key) ? key : 0))
 
@@ -188,9 +252,12 @@ class Svaner {
     AddEdit(options := "", content := "", depend?, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return IsSet(depend) && depend is signal
+        control := IsSet(depend) && depend is signal
             ? SvanerEdit(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddEdit(parsedOptions, content)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -205,9 +272,12 @@ class Svaner {
     AddGroupBox(options, content := "", depend?, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return IsSet(depend) && depend is signal
+        control := IsSet(depend) && depend is signal
             ? SvanerGroupBox(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddGroupBox(parsedOptions, content)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -219,7 +289,10 @@ class Svaner {
     AddHotkey(options, hotkeyString) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddHotkey(parsedOptions, hotkeyString)
+        control := this.gui.AddHotkey(parsedOptions, hotkeyString)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -230,7 +303,12 @@ class Svaner {
      * @returns {Gui.Link} 
      */
     AddLink(options, text) {
-        return this.gui.AddLink(, text)
+        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        
+        control := this.gui.AddLink(parsedOptions, text)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -241,7 +319,12 @@ class Svaner {
      * @returns {Gui.ListBox} 
      */
     AddListBox(options, list) {
-        return this.gui.AddListBox(options, list)
+        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+
+        control := this.gui.AddListBox(options, list)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -265,9 +348,12 @@ class Svaner {
             parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
         }
 
-        return IsSet(depend) && depend is signal
+        control := IsSet(depend) && depend is signal
             ? SvanerListView(this.gui, options, columnDetailsOrList, depend, (IsSet(key) ? key : 0))
             : this.gui.AddListView(parsedOptions, columnDetailsOrList)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -279,7 +365,10 @@ class Svaner {
     AddMonthCal(options) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddMonthCal(options)
+        control := this.gui.AddMonthCal(parsedOptions)
+        this.__applyCustomDirectives(control, parsedOptions)
+
+        return control
     }
 
 
@@ -293,9 +382,12 @@ class Svaner {
     AddPicture(options, dependOrPicFilepath, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return dependOrPicFilepath is signal
+        control := dependOrPicFilepath is signal
             ? SvanerPicture(this.gui, options, dependOrPicFilepath, (IsSet(key) ? key : 0))
             : this.gui.AddPicture(options, dependOrPicFilepath)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
     AddPic(options, dependOrPicFilepath, key?) => this.AddPicture(options, dependOrPicFilepath, (IsSet(key) ? key : 0))
 
@@ -309,7 +401,10 @@ class Svaner {
     AddProgress(options, startingPos := 0) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddProgress(options, startingPos)
+        control := this.gui.AddProgress(options, startingPos)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -324,9 +419,12 @@ class Svaner {
     AddRadio(options, content := "", depend?, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return IsSet(depend) && depend is signal
+        control := IsSet(depend) && depend is signal
             ? SvanerRadio(this.gui, options, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddRadio(options, content)
+        this.__applyCustomDirectives(control, options)
+        
+        return control
     }
 
 
@@ -339,10 +437,13 @@ class Svaner {
     AddSlider(options, startingPos := 0) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddSlider(options, startingPos)
+        control := this.gui.AddSlider(options, startingPos)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
-    
+
     /**
      * 
      * @param {String} options 
@@ -352,7 +453,10 @@ class Svaner {
     AddStatusBar(options := "", startingText := "") {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddStatusBar(options, startingText)
+        control := this.gui.AddStatusBar(options, startingText)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -365,7 +469,10 @@ class Svaner {
     AddTab3(options := "", pages := []) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddTab3(options, pages)
+        control := this.gui.AddTab3(options, pages)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -380,9 +487,12 @@ class Svaner {
     AddText(options, content := "", depend?, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return IsSet(depend) && depend is signal
+        control := IsSet(depend) && depend is signal
             ? SvanerText(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddText(parsedOptions, content)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -396,9 +506,12 @@ class Svaner {
     AddTreeView(options, depend?, key?) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return IsSet(depend) && depend is signal
+        control := IsSet(depend) && depend is signal
             ? SvanerTreeView(this.gui, options, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddTreeView(options)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -411,7 +524,10 @@ class Svaner {
     AddUpDown(options, startingPos := 0) {
         parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
 
-        return this.gui.AddUpDown(options, startingPos)
+        control := this.gui.AddUpDown(options, startingPos)
+        this.__applyCustomDirectives(control, options)
+
+        return control
     }
 
 
@@ -963,7 +1079,7 @@ class Svaner {
         /**
          * Sets the font typeface, size, style, and/or color for controls added to the window from this point onward.
          * ```
-         * AddReactiveText("...", "Text").SetFont("cRed s12", "Arial")
+         * SvanerText("...", "Text").SetFont("cRed s12", "Arial")
          * ```
          * @param {String} options Font options. C: color, S: size, W: weight, Q: quality
          * @param {String} fontName Name of font to set. 
@@ -983,9 +1099,9 @@ class Svaner {
          *  "green", "cGreen"
          * )
          * 
-         * AddReactiveText("...", "Text").SetFontStyles(options, color)
+         * SvanerText("...", "Text").SetFontStyles(options, color)
          * ; or
-         * AddReactiveText("...", "{1}", color).SetFontStyles(options)
+         * SvanerText("...", "{1}", color).SetFontStyles(options)
          * ```
          * @param {Map} optionMap A Map with depend signal value as keys, font options as values
          * @param {Signal} [depend] Signal dependency. If omitted, it will use the Svaner.Control.depend instead.
