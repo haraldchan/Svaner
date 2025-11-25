@@ -1,4 +1,10 @@
 class Show {
+    /**
+     * Creates a block of controls which displays conditionally
+     * @param {()=>Gui.Control | ()=>Svaner.Control | ()=>Array<Gui.Control|Svaner.Control>} renderCallBack 
+     * @param {signal} _signal 
+     * @param {()=>void} conditionFn 
+     */
     __New(renderCallBack, _signal, conditionFn) {
         this.renderCallBack := renderCallBack
         this._signal := _signal
