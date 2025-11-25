@@ -2,18 +2,18 @@
 class Dynamic {
     /**
      * Render stateful component dynamically base on signal.
-     * @param {Gui} guiObj The GUI object to which the Dynamic belongs
+     * @param {Svaner} svanerInstance The Svaner instance to which the Dynamic belongs
      * ```
-     * Dynamic(gui, color, colorEntries, props)
+     * Dynamic(SvanerApp, color, colorEntries, props)
      * ```
      * @param {signal} _signal Depend signal.
      * ```
      * color := signal("Red")
      * ```
-     * @param {Map} componentEntries A Map  with option values and related class components
+     * @param {Map<Any, Component>} componentEntries A Map  with option values and related class components
      * ```
-     * Red(props) {
-     *     r := Component(props.oGui, A_ThisFuc)
+     * Red(SvanerApp, props) {
+     *     r := Component(SvanerApp, A_ThisFuc)
      *     return r
      * }
      * 
@@ -24,13 +24,13 @@ class Dynamic {
      * props := { style: "w200 h30" }
      * ```
      */
-    __New(svanerObj, _signal, componentEntries, props := "", &instances := []) {
-        TypeChecker.checkType(svanerObj, Svaner, "Parameter is not a Gui object or Svaner")
+    __New(svanerInstance, _signal, componentEntries, props := "", &instances := []) {
+        TypeChecker.checkType(svanerInstance, Svaner, "Parameter is not a Gui object or Svaner")
         TypeChecker.checkType(_signal, signal, "Parameter is not a signal")
         TypeChecker.checkType(componentEntries, Map, "Parameter is not a Map")
         TypeChecker.checkType(props, Object.Prototype, "Parameter is not an Object")
 
-        this.svaner := svanerObj
+        this.svaner := svanerInstance
         this.signal := _signal
         this.componentEntries := componentEntries
         this._props := props
