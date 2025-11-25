@@ -37,6 +37,6 @@ class useImages {
     }
 
     use(filename) {
-        return this.imageList[filename]
+        return this.imageList[StrLower(filename)]
     }
 }

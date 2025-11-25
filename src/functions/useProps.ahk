@@ -6,7 +6,7 @@ class useProps {
      * 
      * StaffCard(props){
      *   ; define default values
-     *   info := optionalProps(props, {
+     *   info := useProps(props, {
      *     name: "John Doe",
      *     age:  35,
      *     tel:  88372153
@@ -33,7 +33,7 @@ class useProps {
      *     tel:  Integer
      *   })
      * 
-     *   info := optionalProps(props, staff)
+     *   info := useProps(props, staff)
      * }
      * ```
      * @return {Object}

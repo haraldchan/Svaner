@@ -1,7 +1,7 @@
 class StackBox {
     /**
      * Creates a StackBox component for containing child controls.
-     * @param {Svaner} svanerObj The Svaner object to which the StackBox belongs
+     * @param {Svaner} svanerInstance The Svaner instance to which the StackBox belongs
      * @param {Object} options The options for the StackBox
      * ```
      * StackBox(gui, options, () => [...])
@@ -36,8 +36,8 @@ class StackBox {
      * ]
      * ```
      */
-    __New(svanerObj, options, renderCallback) {
-        this.svaner := svanerObj
+    __New(svanerInstance, options, renderCallback) {
+        this.svaner := svanerInstance
         this.name := options.HasOwnProp("name") ? "$" . options.name : ""
         if (this.name) {
             this.svaner.components.Push(this)
