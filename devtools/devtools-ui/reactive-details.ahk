@@ -14,7 +14,7 @@
  * @param {Map} debuggerMap
  */
 ReactiveDetails(debuggerMap) {
-    RD := Svaner({
+    App := Svaner({
         gui: { 
             title: debuggerMap["signalName"] 
         },
@@ -23,13 +23,60 @@ ReactiveDetails(debuggerMap) {
         }
     })
 
-    valueToShow := debuggerMap["debugger"].value["signalInstance"].value is Object
-        ? JSON.stringify(debuggerMap["debugger"].value["signalInstance"].value)
-        : debuggerMap["debugger"].value["signalInstance"].value
+    signalName := debuggerMap["signalName"]
+    signalType := debuggerMap["signalType"]
+    signalInstance := debuggerMap["debugger"].value["signalInstance"]
+
+    createListViewContent(signalValue) {
+        /** @type {Gui.ListView} */
+        LV := App["lv-primitive"]
+        LV.ModifyCol(1, 100)
+        LV.ModifyCol(2, 200)
+        
+        for indexOrKey, value in signalValue {
+            LV.Add(, indexOrKey, value)    
+        }
+    }
+
+    structredLvOptions := {
+        option: {
+            lvOptions: "vlv-structure @lv:label-tip w300"
+        },
+        columnDetails: {
+            keys: [signalInstance.value]
+        }
+    }
+
+    mountValueControls(signalInstance) {
+        ; primitive values
+        if !(signalInstance.value is Object) {
+            App.AddEdit("x+10 w150 h20 ReadOnly", signalInstance.value)
+        } 
+        ; structured array
+        else if (signalInstance.value is Array && ArrayExt.every(signalInstance.value, item => item is Object)) {
+            App.AddListView(
+                { lvOptions: "vlv-structure @lv:label-tip w300" },
+                { keys: MapExt.keys(signalInstance.value[1]) },
+                signalInstance
+            )
+        }
+        ; array of primitives
+        else if (signalInstance.value is Object) {
+            App.AddListView("vlv-primitive @lv:label-tip w300", [signalInstance.value is Array ? "Index" : "Key", "Value"])
+            createListViewContent(signalInstance.value)
+        }
+    }
 
     return (
-        RD.AddText("w200 h200", valueToShow),
+        App.AddText("vsignal-name w70 h20", "Signal Name:"),
+        App.AddEdit("x+10 w150 h20 ReadOnly", signalName),
+        App.AddText("@align[XWH]:signal-name", "Signal Type:"),
+        App.AddEdit("x+10 w150 h20 ReadOnly", signalType),
+        
+        App.AddText("@align[XWH]:signal-name", "Current Value:"),
 
-        RD.Show()
+        mountValueControls(signalInstance),
+
+        App.Show()
     )
 }
