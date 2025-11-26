@@ -37,7 +37,7 @@ class DebuggerList {
 		new := [this.debuggers.value*]
 
 		for d in new {
-			d["value"] := d["value"] is Object 
+			d["value"] := d["debugger"].value["signalInstance"].value is Object 
 				? JSON.stringify(d["debugger"].value["signalInstance"].value, 0, "")
 				: d["debugger"].value["signalInstance"].value
 		}
