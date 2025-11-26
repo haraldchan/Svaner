@@ -20,11 +20,14 @@ SvanerApp.Show()
  * @param {Svaner} App 
  */
 Counter(App) {
-    count := signal(0)
+    count := signal(0, { name: "count" })
 
-    doubleCount := computed(count, cur => cur * 2)
+    doubleCount := computed(count, cur => cur * 2, { name: "doubleCount" })
 
-    sum := computed([count, doubleCount], (curCount, curDoubled) => curCount + curDoubled)
+    sum := computed([count, doubleCount], (curCount, curDoubled) => curCount + curDoubled, { name: "sum" })
+
+    ; numbers := computed([count, doubleCount, sum], (c,d,s) => [c,d,s], { name: "numbers" })
+    numbers := computed([count, doubleCount, sum], (c,d,s) => Map("count", c, "doubled", d, "sum", s ), { name: "numbers" })
 
     handleIncrement(*) {
         count.set(c => c + 1)
@@ -38,3 +41,5 @@ Counter(App) {
            .onClick(handleIncrement)
     )
 }
+
+DevToolsUI()
