@@ -47,7 +47,7 @@ Reactives(App) {
                 fontOptions: "bold",
                 groupbox: {
                     title: "Computeds / Deriveds",
-                    options: "Section @AlignXWH:signals-stackbox y+5"
+                    options: "Section @align[XWH]:signals-stackbox y+5"
                 }
             },
             () => [
