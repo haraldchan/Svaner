@@ -11,7 +11,7 @@ class OptionParser {
             "@text:align-center", " Center 0x200 ",
             "@pic:real-size", "0x40",
             "@lv:label-tip", "LV0x4000",
-            "@LV:track-select", "LV0x8",
+            "@lv:track-select", "LV0x8",
             "@dt:updown", "0x1",
             "@mc:week-numbers", "0x4",
             "@mc:no-today-circle", "0x8",
@@ -46,7 +46,7 @@ class OptionParser {
 
             parsedPos := ""
             loop parse StringExt.replaceThese(alignment, ["@align[", "]"]), "" {
-                switch A_LoopField {
+                switch StrUpper(A_LoopField) {
                     case "X":
                         parsedPos .= Format(" x{1} ", X)
                     case "Y":
