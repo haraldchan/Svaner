@@ -20,28 +20,56 @@ class OptionParser {
     }
 
     /**
+     * Define custom directives.
+     * @param {Map<string, ()=>void>} directiveDescriptor 
+     */
+    defineDirectives(directiveDescriptor) {
+        for directive, optionsOrCallback in directiveDescriptor {
+            if (!StringExt.startsWith(directive, "@")) {
+                throw ValueError("Directive must starts with `"@`"", -1, directive)
+            }
+
+            StringExt.startsWith(directive, "@func:")
+                ? this.directiveCallbacks[directive] := optionsOrCallback
+                : this.directiveOptionMap[directive] := optionsOrCallback
+        }
+    }
+
+    /**
      * Evaluate options/directives.
      * @param {String} opt 
      * @returns {String} 
      * @throws {ValueError}
      */
     parseDirective(opt) {
+        ; native ahk options
         if (!StringExt.startsWith(opt, "@")) {
             ; ahk options
             return opt
         }
-        else if (this.directiveOptionMap.Has(opt) && !(this.directiveOptionMap[opt] is Func)) {
-            return this.directiveOptionMap[opt]
-        }
+        ; func directive, ignore
         else if (StringExt.startsWith(opt, "@func:")) {
-            return ""
+            return this.directiveCallbacks[opt]
         }
+        ; string options
+        else if (this.directiveOptionMap.Has(opt) && !(this.directiveOptionMap[opt] is Func)) {
+            if (!InStr(this.directiveOptionMap[opt], "@")) {
+                return Format(" {1} ", this.directiveOptionMap[opt])
+            }
+
+            parsed := ""
+            loop parse this.directiveOptionMap[opt], " " {
+                parsed .= Format(" {1} ", this.parseDirective(A_LoopField))
+            }
+
+            return parsed
+        }
+        ; align directive
         else if (StringExt.startsWith(opt, "@align[") && InStr(opt, "]")) {
-        ; else if (RegExMatch(opt, "^@Align(?!.*(.).*\1)[XYWH]+:.*$")) {
             splittedOpts := StrSplit(opt, ":")
             alignment := splittedOpts[1]
             targetCtrl := splittedOpts[2]
-            
+
             this.svaner[targetCtrl].GetPos(&X, &Y, &Width, &Height)
 
             parsedPos := ""
@@ -60,7 +88,8 @@ class OptionParser {
 
             return parsedPos
         }
-        else { 
+        ; unknown
+        else {
             throw ValueError("Unknown directive", -1, opt)
         }
     }

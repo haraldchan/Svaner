@@ -90,14 +90,24 @@ class Svaner {
      * @returns {String} 
      */
     __parseOptions(optionString) {
+        if (!InStr(optionString, "@")) {
+            return [optionString, ""]
+        }
+
         parsed := ""
+        optCallbacks := []
         splittedOptions := StrSplit(optionString, " ")
 
         for opt in splittedOptions {
-            parsed .= this.optParser.parseDirective(opt) . " "
+            res := this.optParser.parseDirective(opt)
+            if (res is Func) {
+                optCallbacks.Push(res)
+            } else {
+                parsed .= Format(" {1} ", res)
+            }
         }
 
-        return parsed
+        return [parsed, optCallbacks]
     }
 
     /**
@@ -135,15 +145,7 @@ class Svaner {
      * @param {Map<string, ()=>void>} directiveDescriptor 
      */
     defineDirectives(directiveDescriptor) {
-        for directive, optionsOrCallback in directiveDescriptor {
-            if (!StringExt.startsWith(directive, "@")) {
-                throw ValueError("Directive must starts with `"@`"", -1, directive)
-            }
-
-            StringExt.startsWith(directive, "@func:")
-                ? this.optParser.directiveCallbacks[directive] := optionsOrCallback
-                : this.optParser.directiveOptionMap[directive] := optionsOrCallback
-        }
+        this.optParser.defineDirectives(directiveDescriptor)
     }
 
 
@@ -485,12 +487,19 @@ class Svaner {
      * @returns {SvanerText | Gui.Text} 
      */
     AddText(options, content := "", depend?, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
+        optionString := parsedOptions[1]
+        optionCallbacks := parsedOptions[2]
 
         control := IsSet(depend) && depend is signal
-            ? SvanerText(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddText(parsedOptions, content)
-        this.__applyCustomDirectives(control, options)
+            ? SvanerText(this.gui, parsedOptions[1], content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddText(parsedOptions[1], content)
+
+        if (optionCallbacks) {
+            for cb in optionCallbacks {
+                cb(control)
+            }
+        }
 
         return control
     }
