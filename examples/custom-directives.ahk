@@ -20,14 +20,14 @@ SvanerApp.Show()
  * @param {Svaner} App 
  */
 CustomDirectives(App) {
-    App.defineDirectives(Map(
-        "@use:red-text", "cRed",
-        "@func:blue-text", ctrl => ctrl.SetFont("cBlue bold s12"),
-        "@func:click-to-green", handleGreenify,
-        "@use:sunk", "0x1000",
-        "@use:combination", "@use:red-text @text:align-center",
-        "@use:nested-comb", "@use:combination @use:sunk"
-    ))
+    App.defineDirectives(
+        "@use:red-text",    "cRed",
+        "@func:blue-text",  ctrl => ctrl.SetFont("cBlue bold s12"),
+        "@func:greenify",   handleGreenify,
+        "@use:sunk",        "0x1000",
+        "@use:combination", "@align[wh]:first-text @text:align-center",
+        "@use:nested-comb", "@use:combination @use:sunk @func:greenify"
+    )
 
     /**
      * @param {Svaner.Control | Gui.Control} ctrl 
@@ -36,13 +36,11 @@ CustomDirectives(App) {
         ctrl.onClick((*) => ctrl.SetFont("cGreen", "Verdana"))
     }
 
-    textStyle := "w200 h30 @text:align-center "
-
     return (
-        App.AddText(textStyle . "@use:red-text", "Using red-text"),
-        App.AddText(textStyle . "@func:blue-text", "Using callback blue-text"),
-        App.AddText(textStyle . "@func:click-to-green", "Click to green!"),
-        App.AddText("w200 h30 @use:nested-comb @func:click-to-green", "Directive Combination"),
+        App.AddText("vfirst-text w200 h30 @text:align-center @use:red-text", "Using red-text"),
+        App.AddText("@use:combination @func:blue-text", "Using callback blue-text"),
+        App.AddText("@use:combination @func:greenify", "Click to green!"),
+        App.AddText("@use:nested-comb", "Directive Combination"),
         0
     )
 }
