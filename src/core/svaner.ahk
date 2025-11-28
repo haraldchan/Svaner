@@ -1,3 +1,10 @@
+/**
+ * @typedef {Object} SvanerConfigs
+ * @property { { options?: String, title?: String } } gui
+ * @property { { options?: String, name?: String } } font
+ * @property { { [key: String]: ()=>void } } events
+ */
+
 class Svaner {
     /**
      * Initialize a Svaner object.
@@ -17,18 +24,18 @@ class Svaner {
      *      }
      * }
      * ```
-     * @param configs 
+     * @param {SvanerConfigs} SvanerConfigs 
      * @returns {Svaner}
      */
-    __New(configs) {
+    __New(SvanerConfigs) {
         ; create gui
         this.gui := Gui(
-            configs.gui.HasOwnProp("options") ? configs.gui.options : "",
-            configs.gui.HasOwnProp("title") ? configs.gui.title : A_ScriptName,
+            SvanerConfigs.gui.HasOwnProp("options") ? SvanerConfigs.gui.options : "",
+            SvanerConfigs.gui.HasOwnProp("title") ? SvanerConfigs.gui.title : A_ScriptName,
         )
 
-        if (configs.gui.HasOwnProp("events")) {
-            for event, callback in configs.gui.events.OwnProps() {
+        if (SvanerConfigs.gui.HasOwnProp("events")) {
+            for event, callback in SvanerConfigs.gui.events.OwnProps() {
                 this.gui.OnEvent(event, callback)
             }
         }
@@ -38,10 +45,10 @@ class Svaner {
         this.gui.scs.Default := ""
 
         ; set font
-        if (configs.HasOwnProp("font")) {
+        if (SvanerConfigs.HasOwnProp("font")) {
             this.gui.SetFont(
-                configs.font.HasOwnProp("options") ? configs.font.options : "",
-                configs.font.HasOwnProp("name") ? configs.font.name : ""
+                SvanerConfigs.font.HasOwnProp("options") ? SvanerConfigs.font.options : "",
+                SvanerConfigs.font.HasOwnProp("name") ? SvanerConfigs.font.name : ""
             )
         }
 
@@ -64,20 +71,20 @@ class Svaner {
             }
 
             switch {
-                ; by type
                 case InStr(ctrlSearchCondition, "type:"):
+                    ; by type
                     return GuiExt.getCtrlByType(this.gui, StrReplace(ctrlSearchCondition, "type:", ""))
 
-                    ; by type all
                 case InStr(ctrlSearchCondition, "typeAll:"):
+                    ; by type all
                     return GuiExt.getCtrlByTypeAll(this.gui, StrReplace(ctrlSearchCondition, "typeAll:", ""))
 
-                    ; search component
                 case InStr(ctrlSearchCondition, "component:"):
+                    ; search component
                     return GuiExt.getComponent(this, StrReplace(ctrlSearchCondition, "component:"))
 
-                    ; by name
                 default:
+                    ; by name
                     return GuiExt.getCtrlByName(this.gui, ctrlSearchCondition)
             }
         }
@@ -87,11 +94,11 @@ class Svaner {
     /**
      * Parse options/directives to native options.
      * @param {String} optionString 
-     * @returns {String} 
+     * @returns { {parsed: String, callbacks: Func[]} } 
      */
     __parseOptions(optionString) {
         if (!InStr(optionString, "@")) {
-            return [optionString, ""]
+            return { parsed: optionString, callbacks: "" }
         }
 
         parsed := ""
@@ -99,7 +106,7 @@ class Svaner {
         splittedOptions := StrSplit(optionString, " ")
 
         for opt in splittedOptions {
-            res := this.optParser.parseDirective(opt)
+            res := this.optParser.parseDirective(opt, optCallbacks)
             if (res is Func) {
                 optCallbacks.Push(res)
             } else {
@@ -107,18 +114,18 @@ class Svaner {
             }
         }
 
-        return [parsed, optCallbacks]
+        return { parsed: parsed, callbacks: optCallbacks.Length ? optCallbacks : "" }
     }
 
     /**
      * Apply custom directives to control.
      * @param {Svaner.Control | Gui.Control} control 
-     * @param {String} options 
+     * @param {Array<Func>} callbacks 
      */
-    __applyCustomDirectives(control, options) {
-        loop parse options, " " {
-            if (this.optParser.directiveCallbacks.Has(A_LoopField)) {
-                this.optParser.directiveCallbacks[A_LoopField](control)
+    __applyCallbackDirectives(control, callbacks) {
+        if (callbacks) {
+            for callback in callbacks {
+                callback(control)
             }
         }
     }
@@ -128,24 +135,22 @@ class Svaner {
      * Sets various options and styles for the appearance and behavior of the gui window.
      * @param {String} options options apply to the gui window.
      */
-    Opt(options) {
-        this.gui.Opt(options)
-    }
+    Opt(options) => this.gui.Opt(options)
 
 
     /**
      * Show Gui window.
-     * @param {String} options 
+     * @param {String} [options] 
      */
     Show(options := "") => this.gui.Show(options)
 
 
     /**
      * Define custom directives.
-     * @param {Map<string, ()=>void>} directiveDescriptor 
+     * @param {[string, ()=>void, *]} directiveDescriptor 
      */
-    defineDirectives(directiveDescriptor) {
-        this.optParser.defineDirectives(directiveDescriptor)
+    defineDirectives(directiveDescriptor*) {
+        this.optParser.defineDirectives(Map(directiveDescriptor*))
     }
 
 
@@ -158,12 +163,12 @@ class Svaner {
      * @returns {SvanerButton | Gui.Button} 
      */
     AddButton(options := "", content := "", depend?, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := IsSet(depend) && depend is signal
-            ? SvanerButton(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddButton(parsedOptions, content)
-        this.__applyCustomDirectives(control, options)
+            ? SvanerButton(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddButton(parsedOptions.parsed, content)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -178,12 +183,12 @@ class Svaner {
      * @returns {SvanerCheckBox | Gui.CheckBox} 
      */
     AddCheckBox(options, content := "", depend?, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control :=  IsSet(depend) && depend is signal
-            ? SvanerCheckBox(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddCheckbox(parsedOptions, content)
-        this.__applyCustomDirectives(control, options)
+        control := IsSet(depend) && depend is signal
+            ? SvanerCheckBox(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddCheckbox(parsedOptions.parsed, content)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -197,12 +202,12 @@ class Svaner {
      * @returns {SvanerComboBox | Gui.ComboBox} 
      */
     AddComboBox(options, dependOrList := [], key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control :=  dependOrList is signal
-            ? SvanerComboBox(this.gui, parsedOptions, dependOrList, (IsSet(key) ? key : 0))
-            : this.gui.AddComboBox(parsedOptions, dependOrList)
-        this.__applyCustomDirectives(control, options)
+        control := dependOrList is signal
+            ? SvanerComboBox(this.gui, parsedOptions.parsed, dependOrList, (IsSet(key) ? key : 0))
+            : this.gui.AddComboBox(parsedOptions.parsed, dependOrList)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -214,10 +219,10 @@ class Svaner {
      * @returns {Gui.DateTime} 
      */
     AddDateTime(options, dateFormat := "ShortDate") {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddDateTime(parsedOptions, dateFormat)
-        this.__applyCustomDirectives(control, options)
+        control := this.gui.AddDateTime(parsedOptions.parsed, dateFormat)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -231,12 +236,12 @@ class Svaner {
      * @returns {SvanerDropDownList | Gui.DDL} 
      */
     AddDropDownList(options, dependOrList, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := dependOrList is signal
-            ? SvanerDropDownList(this.gui, parsedOptions, dependOrList)
-            : this.gui.AddDDL(parsedOptions, dependOrList)
-        this.__applyCustomDirectives(control, options)
+            ? SvanerDropDownList(this.gui, parsedOptions.parsed, dependOrList)
+            : this.gui.AddDDL(parsedOptions.parsed, dependOrList)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -252,12 +257,12 @@ class Svaner {
      * @returns {SvanerEdit | Gui.Edit} 
      */
     AddEdit(options := "", content := "", depend?, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := IsSet(depend) && depend is signal
-            ? SvanerEdit(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddEdit(parsedOptions, content)
-        this.__applyCustomDirectives(control, options)
+            ? SvanerEdit(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddEdit(parsedOptions.parsed, content)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -272,12 +277,12 @@ class Svaner {
      * @returns {SvanerGroupBox | Gui.GroupBox} 
      */
     AddGroupBox(options, content := "", depend?, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := IsSet(depend) && depend is signal
-            ? SvanerGroupBox(this.gui, parsedOptions, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddGroupBox(parsedOptions, content)
-        this.__applyCustomDirectives(control, options)
+            ? SvanerGroupBox(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddGroupBox(parsedOptions.parsed, content)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -289,10 +294,10 @@ class Svaner {
      * @returns {Gui.Hotkey} 
      */
     AddHotkey(options, hotkeyString) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddHotkey(parsedOptions, hotkeyString)
-        this.__applyCustomDirectives(control, options)
+        control := this.gui.AddHotkey(parsedOptions.parsed, hotkeyString)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -305,10 +310,10 @@ class Svaner {
      * @returns {Gui.Link} 
      */
     AddLink(options, text) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
-        
-        control := this.gui.AddLink(parsedOptions, text)
-        this.__applyCustomDirectives(control, options)
+        parsedOptions := this.__parseOptions(options)
+
+        control := this.gui.AddLink(parsedOptions.parsed, text)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -321,10 +326,10 @@ class Svaner {
      * @returns {Gui.ListBox} 
      */
     AddListBox(options, list) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddListBox(options, list)
-        this.__applyCustomDirectives(control, options)
+        control := this.gui.AddListBox(parsedOptions.parsed, list)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -332,28 +337,35 @@ class Svaner {
 
     /**
      * Add a ListView/SvanerListView control to Gui.
-     * @param { {lvOptions: String[], itemOptions: String[]} | String} options Options/Directives apply to the control.
-     * @param { {keys: String[], titles: String[], width: Number[]} | String[]} columnDetailsOrList 
+     * @param { {lvOptions: Array<String>, itemOptions: Array<String>} | String} options Options/Directives apply to the control.
+     * @param { {keys: Array<String>, titles: Array<String>, width: Array<Number>} | Array<String>} columnDetailsOrList 
      * @param {signal} [depend] Subscribed signal.
      * @param {String|Array|Object} [key] the keys or index of the signal's value.
      * @returns {SvanerListView | Gui.ListView}
      */
     AddListView(options, columnDetailsOrList, depend?, key?) {
         if (options is Object) {
-            if (options.HasOwnProp("lvOptions")) {
-                options.lvOptions := this.__parseOptions(options.lvOptions)
-            }
-            if (options.HasOwnProp("itemOptions")) {
-                options.itemOptions := this.__parseOptions(options.itemOptions)
-            }
+            ; SvanerListView
+            parsedLvOptions := this.__parseOptions(options.lvOptions)
+            parsedItemOptions := options.HasOwnProp("itemOptions")
+                ? this.__parseOptions(options.itemOptions)
+                : { parsed: "", callbacks: "" }
         } else {
-            parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+            ; Native ListView
+            parsedOptions := this.__parseOptions(options)
         }
 
         control := IsSet(depend) && depend is signal
-            ? SvanerListView(this.gui, options, columnDetailsOrList, depend, (IsSet(key) ? key : 0))
-            : this.gui.AddListView(parsedOptions, columnDetailsOrList)
-        this.__applyCustomDirectives(control, options)
+            ? SvanerListView(
+                this.gui, { lvOptions: parsedLvOptions.parsed, itemOptions: parsedItemOptions.parsed },
+                columnDetailsOrList, depend, (IsSet(key) ? key : 0))
+            : this.gui.AddListView(parsedOptions.parsed, columnDetailsOrList)
+
+        if (parsedLvOptions.callbacks || parsedItemOptions.callbacks) {
+            callbacks := ArrayExt.append(parsedLvOptions.callbacks, parsedItemOptions.callbacks)
+        }
+
+        this.__applyCallbackDirectives(control, IsSet(callbacks) ? callbacks : "")
 
         return control
     }
@@ -365,10 +377,10 @@ class Svaner {
      * @returns {Gui.MonthCal} 
      */
     AddMonthCal(options) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddMonthCal(parsedOptions)
-        this.__applyCustomDirectives(control, parsedOptions)
+        control := this.gui.AddMonthCal(parsedOptions.parsed)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -382,12 +394,12 @@ class Svaner {
      * @returns {SvanerPicture | Gui.Pic} 
      */
     AddPicture(options, dependOrPicFilepath, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := dependOrPicFilepath is signal
-            ? SvanerPicture(this.gui, options, dependOrPicFilepath, (IsSet(key) ? key : 0))
+            ? SvanerPicture(this.gui, parsedOptions.parsed, dependOrPicFilepath, (IsSet(key) ? key : 0))
             : this.gui.AddPicture(options, dependOrPicFilepath)
-        this.__applyCustomDirectives(control, options)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -401,10 +413,10 @@ class Svaner {
      * @returns {Gui.Progress} 
      */
     AddProgress(options, startingPos := 0) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddProgress(options, startingPos)
-        this.__applyCustomDirectives(control, options)
+        control := this.gui.AddProgress(parsedOptions.parsed, startingPos)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -419,13 +431,13 @@ class Svaner {
      * @returns {SvanerRadio | Gui.Radio} 
      */
     AddRadio(options, content := "", depend?, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := IsSet(depend) && depend is signal
-            ? SvanerRadio(this.gui, options, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddRadio(options, content)
-        this.__applyCustomDirectives(control, options)
-        
+            ? SvanerRadio(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddRadio(parsedOptions.parsed, content)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
+
         return control
     }
 
@@ -437,10 +449,10 @@ class Svaner {
      * @returns {Gui.Slider} 
      */
     AddSlider(options, startingPos := 0) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddSlider(options, startingPos)
-        this.__applyCustomDirectives(control, options)
+        control := this.gui.AddSlider(parsedOptions.parsed, startingPos)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -453,10 +465,10 @@ class Svaner {
      * @returns {Gui.StatusBar} 
      */
     AddStatusBar(options := "", startingText := "") {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddStatusBar(options, startingText)
-        this.__applyCustomDirectives(control, options)
+        control := this.gui.AddStatusBar(parsedOptions.parsed, startingText)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -469,10 +481,10 @@ class Svaner {
      * @returns {Gui.Tab} 
      */
     AddTab3(options := "", pages := []) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddTab3(options, pages)
-        this.__applyCustomDirectives(control, options)
+        control := this.gui.AddTab3(parsedOptions.parsed, pages)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -488,18 +500,11 @@ class Svaner {
      */
     AddText(options, content := "", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
-        optionString := parsedOptions[1]
-        optionCallbacks := parsedOptions[2]
 
         control := IsSet(depend) && depend is signal
-            ? SvanerText(this.gui, parsedOptions[1], content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
-            : this.gui.AddText(parsedOptions[1], content)
-
-        if (optionCallbacks) {
-            for cb in optionCallbacks {
-                cb(control)
-            }
-        }
+            ? SvanerText(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
+            : this.gui.AddText(parsedOptions.parsed, content)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -513,12 +518,12 @@ class Svaner {
      * @returns {SvanerTreeView | Gui.TreeView} 
      */
     AddTreeView(options, depend?, key?) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := IsSet(depend) && depend is signal
             ? SvanerTreeView(this.gui, options, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddTreeView(options)
-        this.__applyCustomDirectives(control, options)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
@@ -531,10 +536,10 @@ class Svaner {
      * @returns {Gui.UpDown} 
      */
     AddUpDown(options, startingPos := 0) {
-        parsedOptions := InStr(options, "@") ? this.__parseOptions(options) : options
+        parsedOptions := this.__parseOptions(options)
 
         control := this.gui.AddUpDown(options, startingPos)
-        this.__applyCustomDirectives(control, options)
+        this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
