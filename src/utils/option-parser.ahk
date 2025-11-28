@@ -5,10 +5,11 @@ class OptionParser {
      */
     __New(SvanerInstance) {
         this.svaner := SvanerInstance
-        this.directiveCallbacks := Map()
-        this.directiveOptionMap := Map(
-            "@button:icon-only", " 0x40 0x300 ",
-            "@text:align-center", " Center 0x200 ",
+        this.callbackDirectives := Map()
+        this.customUseDirectives := Map()
+        this.presetDirectives := Map(
+            "@button:icon-only", "0x40 0x300",
+            "@text:align-center", "Center 0x200",
             "@pic:real-size", "0x40",
             "@lv:label-tip", "LV0x4000",
             "@lv:track-select", "LV0x8",
@@ -18,6 +19,7 @@ class OptionParser {
             "@mc:no-today", "0x10",
         )
     }
+
 
     /**
      * Define custom directives.
@@ -29,19 +31,24 @@ class OptionParser {
                 throw ValueError("Directive must starts with `"@`"", -1, directive)
             }
 
-            StringExt.startsWith(directive, "@func:")
-                ? this.directiveCallbacks[directive] := optionsOrCallback
-                : this.directiveOptionMap[directive] := optionsOrCallback
+            if (StringExt.startsWith(directive, "@use:")) {
+                this.customUseDirectives[directive] := optionsOrCallback
+            }
+            else if (StringExt.startsWith(directive, "@func:")) {
+                this.callbackDirectives[directive] := optionsOrCallback
+            }
         }
     }
+
 
     /**
      * Evaluate options/directives.
      * @param {String} opt 
+     * @param {Array} callbackArray 
      * @returns {String} 
      * @throws {ValueError}
      */
-    parseDirective(opt) {
+    parseDirective(opt, callbackArray) {
         ; native ahk options
         if (!StringExt.startsWith(opt, "@")) {
             ; ahk options
@@ -49,23 +56,32 @@ class OptionParser {
         }
         ; func directive, ignore
         else if (StringExt.startsWith(opt, "@func:")) {
-            return this.directiveCallbacks[opt]
+            return this.callbackDirectives[opt]
         }
-        ; string options
-        else if (this.directiveOptionMap.Has(opt) && !(this.directiveOptionMap[opt] is Func)) {
-            if (!InStr(this.directiveOptionMap[opt], "@")) {
-                return Format(" {1} ", this.directiveOptionMap[opt])
+        ; preset directives
+        else if (this.presetDirectives.Has(opt)) {
+            return Format(" {1} ", this.presetDirectives[opt])
+        }
+        ; custom directives
+        else if (this.customUseDirectives.Has(opt)) {
+            if (!InStr(this.customUseDirectives[opt], "@")) {
+                return Format(" {1} ", this.customUseDirectives[opt])
             }
 
             parsed := ""
-            loop parse this.directiveOptionMap[opt], " " {
-                parsed .= Format(" {1} ", this.parseDirective(A_LoopField))
+            loop parse this.customUseDirectives[opt], " " {
+                res := this.parseDirective(A_LoopField, callbackArray)
+                if (res is Func) {
+                    callbackArray.Push(res)
+                } else {
+                    parsed .= Format(" {1} ", res)
+                }
             }
 
             return parsed
         }
         ; align directive
-        else if (StringExt.startsWith(opt, "@align[") && InStr(opt, "]")) {
+        else if (StringExt.startsWith(opt, "@align[") && InStr(opt, "]:")) {
             splittedOpts := StrSplit(opt, ":")
             alignment := splittedOpts[1]
             targetCtrl := splittedOpts[2]
@@ -90,7 +106,7 @@ class OptionParser {
         }
         ; unknown
         else {
-            throw ValueError("Unknown directive", -1, opt)
+            throw ValueError("Unknown directive. `n`nCustom directives must starts with `"@use:`" or `"@func:`".", -1, opt)
         }
     }
 }
