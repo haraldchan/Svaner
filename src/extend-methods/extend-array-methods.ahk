@@ -262,12 +262,11 @@ class ArrayExt {
         newArray := [arr*]
 
         if (val is Array) {
-            for item in val {
-                newArray.Push(item)
-            }
+            newArray.Push(val*)
         } else {
             newArray.Push(val)
         }
+
         return newArray
     }
 
