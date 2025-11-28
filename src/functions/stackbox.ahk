@@ -49,14 +49,17 @@ class StackBox {
         this.ctrls := []
 
         ; GroupBox option
-        this.gbOption := this.svaner.__parseOptions(options.groupbox.options)
+        this.gbOptions := this.svaner.__parseOptions(options.groupbox.options)
         this.gbTitle := options.groupbox.HasOwnProp("title") && !options.HasOwnProp("checkbox") ? options.groupbox.title : ""
         ; CheckBox option
         this.checkbox := options.HasOwnProp("checkbox") ? options.checkbox : ""
         if (this.checkbox) {
-            this.checkbox.options := this.checkbox.HasOwnProp("options") 
-                ? this.svaner.__parseOptions(this.checkbox.options) . " xs10 yp" 
-                : " xs10 yp"
+            this.cbOptions := { parsed: " xs10 yp ", callbacks: "" }
+    
+            if (this.checkbox.HasOwnProp("options")) {
+                this.cbOptions := this.svaner.__parseOptions(this.checkbox.options)
+
+            }
         }
 
         ; mount controls
@@ -117,14 +120,14 @@ class StackBox {
 
     _renderStackBox(App) {
         ; mount GroupBox
-        this.gbCtrl := App.AddGroupBox(this.gbOption, this.gbTitle)
+        this.gbCtrl := App.AddGroupBox(this.gbOptions.parsed, this.gbTitle)
         this.gbCtrl.SetFont(this.fontOptions, this.fontName)
         this.ctrls.Push(this.gbCtrl)
         this.gbCtrl.GetPos(&gbX, &gbY, &gbWidth, &gbHeight)
 
         ; mount CheckBox if using check box as title
         if (this.checkbox) {
-            this.cbCtrl := App.AddCheckbox(this.checkbox.options, this.checkbox.title)
+            this.cbCtrl := App.AddCheckbox(this.cbOptions.parsed, this.checkbox.title)
             this.cbCtrl.SetFont(this.fontOptions, this.fontName)
             this.cbCtrl.OnEvent("Click", (ctrl, _) => this.setEnable(ctrl.Value))
             this.ctrls.Push(this.cbCtrl)
