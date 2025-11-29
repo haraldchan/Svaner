@@ -13,9 +13,7 @@ class signal {
      * @return {Signal}
      */
     __New(initialValue, options := { name: "", forceUpdate: false }) {
-        this.value := initialValue.base == Object.Prototype || initialValue is Array || initialValue is Map
-            ? this._mapify(initialValue)
-            : initialValue
+        this.value := this._mapify(initialValue)
         this.initValue := this.value
         this.prevValue := 0
         
@@ -63,28 +61,14 @@ class signal {
         }
         this.prevValue := this.value
 
-        ; validates new value if it matches the Struct
-        if (this.type is Struct) {
-            validateInstance := this.type.new(newSignalValue is Struct.StructInstance ? newSignalValue.mapify() : newSignalValue)
-            validateInstance := ""
-        } else if (this.type is Array && this.type[1] is Struct) {
-            for item in newSignalValue {
-                validateInstance := this.type[1].new(item is Struct.StructInstance ? item.mapify() : item)
-                validateInstance := ""
-            }
-        } else if (this.type is Array) {
-            if (!ArrayExt.find(this.type, item => item = newSignalValue)) {
-                throw ValueError("Type mismatch.`n`nAssignable: " . JSON.stringify(this.type, 0), -1, this.value)
-            }
-        } else if (this.type != "") {
-            TypeChecker.checkType(newSignalValue, this.type)
-        }
-
         prevValue := this.value
         this.value := newSignalValue is Func ? newSignalValue(this.value) : newSignalValue
         if (this.value.base == Object.Prototype || this.value is Array || this.value is Map) {
             this.value := this._mapify(this.value)
         }
+
+        ; validates new value if it matches the Struct
+        this._validateType(this.type, this.value)
 
         ; notify all subscribers to update
         for ctrl in this.subs {
@@ -186,28 +170,44 @@ class signal {
      */
     as(datatype) {
         this.type := datatype
-
-        if (datatype is Struct) {
-            ; try creating the same struct instance for validate.
-            validateInstance := this.type.new(this.value is Struct.StructInstance ? this.value.mapify() : this.value)
-            validateInstance := ""
-
-        } else if (datatype is Array && datatype[1] is Struct) {
-            for item in this.value {
-                validateInstance := this.type[1].new(item is Struct.StructInstance ? item.mapify() : item)
-                validateInstance := ""
-            }
-        } else if (datatype is Array) {
-            if (!ArrayExt.find(datatype, t => t == this.value)) {
-                throw ValueError("Type mismatch.`n`nAssignable: " . JSON.stringify(datatype, 0), -1, this.value)
-            }
-        }
-         else {
-            TypeChecker.checkType(this.value, datatype)
-        }
+        this._validateType(this.type, this.value)
 
         return this
     }
+
+    ; to validate type if enabled .as
+    _validateType(datatype, valueToValidate) {
+        if (!datatype) {
+            return
+        }
+
+        if (datatype is Struct) {
+            ; try creating the same struct instance for validate.
+            validateInstance := this.type.new(valueToValidate is Struct.StructInstance ? valueToValidate.mapify() : valueToValidate)
+            validateInstance := ""
+        } else if (datatype is Array) {
+            switch {
+                case (datatype.Length == 1 && datatype[1] is Struct):
+                    for item in valueToValidate {
+                        validateInstance := this.type[1].new(item is Struct.StructInstance ? item.mapify() : item)
+                        validateInstance := ""
+                    }
+                case (datatype.Length == 1):
+                    for item in valueToValidate {
+                        TypeChecker.checkType(item, datatype)
+                    }
+                default:
+                    if (!ArrayExt.find(datatype, t => t == valueToValidate)) {
+                        errMsg := Format("Type mismatch.`n`nAssignables: {1}", ArrayExt.join(datatype, " | "))
+                        throw ValueError(errMsg, -1, valueToValidate)
+                    } 
+            }
+        }
+        else {
+            TypeChecker.checkType(valueToValidate, datatype)
+        }
+    }
+
 
     /**
      * Interface for AddReactiveControl instances to subscribe.
@@ -239,7 +239,7 @@ class signal {
      * @returns {Any|Map}
      */
     _mapify(obj) {
-        if ((obj.base != Object.Prototype) && !(obj is Array) && !(obj is Map)) {
+        if (obj is Primitive) {
             return obj
         }
 
