@@ -111,53 +111,11 @@ class TypeChecker {
     }
 
     static getTypeName(classType) {
-        if (classType is Struct) {
-            return "Struct"
-        }
-
         if (classType is Array) {
             itemType := this.getTypeName(classType[1])
-            return "Array of " . itemType . "s"
+            return "Array<" . itemType . ">"
         }
 
-        switch classType {
-            ; primitives
-            case Number:
-                return "Number"
-            case Integer:
-                return "Integer"
-            case Float:
-                return "Float"
-            case String:
-                return "String"
-
-                ; objects
-            case Func:
-                return "Func"
-            case Enumerator:
-                return "Enumerator"
-            case Closure:
-                return "Closure"
-            case Class:
-                return "Class"
-            case Map:
-                return "Map"
-            case Array:
-                return "Array"
-            case Buffer:
-                return "Buffer"
-            case ComObject:
-                return "ComObject"
-            case Gui:
-                return "Gui"
-
-                ; AddReactive funcs
-            case OrderedMap:
-                return "OrderedMap"
-
-                ; Object
-            case Object:
-                return "Object"
-        }
+        return classType.Prototype.__Class
     }
 }
