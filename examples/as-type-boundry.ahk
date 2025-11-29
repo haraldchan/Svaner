@@ -21,12 +21,7 @@ SvanerApp.Show()
  * @param {Svaner} App 
  */
 AsTypeBoundry(App) {
-    admin := signal("amy").as(["harald", "amy", "leon"])
-    adminInfo := signal([
-        { name: "harald", pos: "staff", age: 22 },
-        { name: "amy", pos: "supervisor", age: 27 },
-        { name: "leon", pos: "manager", age: 33 },
-    ], { name: "adminInfo" })
+    admin := signal("amy", { name: "adming" }).as(["harald", "amy", "leon"])
 
     handleSetNewAdmin(*) {
         try {
@@ -44,4 +39,4 @@ AsTypeBoundry(App) {
     )
 }
 
-DevToolsUI()
+; DevToolsUI()
