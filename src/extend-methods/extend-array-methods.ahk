@@ -20,12 +20,23 @@ class ArrayExt {
             }
         }
     }
+    
+    /**
+     * Executes a provided function once for each array element.
+     * @param {Array} arr - The array to iterate over.
+     * @param {Func} fn - The function to execute for each element.
+     */
+    static forEach(arr, fn) {
+        for item in arr {
+            arr[A_Index] := fn(item)
+        }
+    }
 
     /**
      * Returns true if at least one element in the array passes the test implemented by the provided function.
      * @param {Array} arr - The array to test.
-     * @param {Function} fn - The test function.
-     * @returns {Boolean}
+     * @param {Func} fn - The test function.
+     * @returns {1 | 0}
      */
     static some(arr, fn) {
         for item in arr {
@@ -41,7 +52,7 @@ class ArrayExt {
      * @param {Array} arr - The array to search.
      * @param {Any} val - The value to search for.
      * @param {Integer} [fromIndex=1] - The index to start the search from.
-     * @returns {Boolean}
+     * @returns {1 | 0}
      */
     static includes(arr, val, fromIndex := 1) {
         for item in arr {
@@ -59,8 +70,8 @@ class ArrayExt {
     /**
      * Returns true if all elements in the array pass the test implemented by the provided function.
      * @param {Array} arr - The array to test.
-     * @param {Function} fn - The test function.
-     * @returns {Boolean}
+     * @param {Func} fn - The test function.
+     * @returns {1 | 0}
      */
     static every(arr, fn) {
         for item in arr {
@@ -73,7 +84,7 @@ class ArrayExt {
     /**
      * Creates a new array with all elements that pass the test implemented by the provided function.
      * @param {Array} arr - The array to filter.
-     * @param {Function} fn - The test function.
+     * @param {Func} fn - The test function.
      * @returns {Array}
      */
     static filter(arr, fn) {
@@ -90,8 +101,8 @@ class ArrayExt {
     /**
      * Returns the value of the first element in the array that satisfies the provided testing function.
      * @param {Array} arr - The array to search.
-     * @param {Function} fn - The test function.
-     * @returns {Any|false} - The found element or false if none found.
+     * @param {Func} fn - The test function.
+     * @returns {Any | 0} - The found element or false if none found.
      */
     static find(arr, fn) {
         for item in arr {
@@ -106,8 +117,8 @@ class ArrayExt {
     /**
      * Returns the value of the last element in the array that satisfies the provided testing function.
      * @param {Array} arr  The array to search.
-     * @param {Function} fn - The test function.
-     * @returns {Any|false} - The found element or false if none found.
+     * @param {Func} fn - The test function.
+     * @returns {Any | 0} - The found element or false if none found.
      */
     static findLast(arr, fn) {
         index := arr.Length
@@ -126,8 +137,8 @@ class ArrayExt {
     /**
      * Returns the index of the first element in the array that satisfies the provided testing function.
      * @param {Array} arr - The array to search.
-     * @param {Function} fn - The test function.
-     * @returns {Integer|false} - The index of the found element or false if none found.
+     * @param {Func} fn - The test function.
+     * @returns {Integer | 0} - The index of the found element or false if none found.
      */
     static findIndex(arr, fn) {
         for item in arr {
@@ -142,8 +153,8 @@ class ArrayExt {
     /**
      * Returns the index of the last element in the array that satisfies the provided testing function.
      * @param {Array} arr - The array to search.
-     * @param {Function} fn - The test function.
-     * @returns {Integer|false} - The index of the found element or false if none found.
+     * @param {Func} fn - The test function.
+     * @returns {Integer | 0} - The index of the found element or false if none found.
      */
     static findLastIndex(arr, fn) {
         index := arr.Length
@@ -183,7 +194,7 @@ class ArrayExt {
     /**
      * Creates a new array with the results of calling a provided function on every element.
      * @param {Array} arr  - The array to map.
-     * @param {Function} fn - The mapping function.
+     * @param {Func} fn - The mapping function.
      * @returns {Array}
      */
     static map(arr, fn) {
@@ -205,7 +216,7 @@ class ArrayExt {
     /**
      * Applies a function against an accumulator and each element to reduce it to a single value.
      * @param {Array} arr - The array to reduce.
-     * @param {Function} fn - The reducer function.
+     * @param {Func} fn - The reducer function.
      * @param {Any} initialValue - Initial value for the accumulator.
      * @returns {Any}
      */
@@ -394,7 +405,7 @@ class ArrayExt {
      * Merges two sorted arrays into one sorted array using compareFn.
      * @param {Array} arr1 - First sorted array.
      * @param {Array} arr2 - Second sorted array.
-     * @param {Function} compareFn - Comparison function.
+     * @param {Func} compareFn - Comparison function.
      * @returns {Array}
      */
     static _merge(arr1, arr2, compareFn) {
@@ -414,7 +425,7 @@ class ArrayExt {
     /**
      * Sorts the array using merge sort and compareFn.
      * @param {Array} arr - The array to sort.
-     * @param {Function} [compareFn] - Comparison function.
+     * @param {Func} [compareFn] - Comparison function.
      * @returns {Array}
      */
     static sort(arr, compareFn := default(a, b) => a - b) {

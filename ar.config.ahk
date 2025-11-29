@@ -5,6 +5,7 @@ class ARConfig {
     static useExtendMethods := true
     static enableExtendMethods := {
         array: {
+            forEach:       true,
             includes:      true,
             some:          true,
             every:         true,
