@@ -20,11 +20,6 @@ SvanerApp.Show()
  * @param {Svaner} App 
  */
 StructTypes(App) {
-    Contact := Struct({
-        tel: Integer,
-        email: String
-    })
-
     Staff := Struct({
         name: String,
         pos:  ["attendeng", "supervisor", "manager"],
@@ -38,7 +33,10 @@ StructTypes(App) {
     ], { name: "staffList" }).as([Staff])
 
     handleAddNewStaff(*) {
-        if (!App["new-name"].Value || !App["new-pos"].Value || !App["new-age"].Value) {
+        /** @type {Array<Gui.Control>} */
+        formCtrls := App[ctrl => ctrl.Name.startsWith("new-")]
+
+        if (formCtrls.find(ctrl => !ctrl.Value)) {
             return
         }
 
@@ -48,7 +46,12 @@ StructTypes(App) {
             age: Integer(App["new-age"].Value),
         }
 
-        staffList.set(cur => cur.append(newStaff))
+        try {
+            staffList.set(cur => cur.append(newStaff))
+        } catch Error as e {
+            msgbox e.Message
+            formCtrls.forEach(ctrl => ctrl.Value := "")
+        }
     }
 
     return (

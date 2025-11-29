@@ -26,7 +26,6 @@ Counter(App) {
 
     sum := computed([count, doubleCount], (curCount, curDoubled) => curCount + curDoubled, { name: "sum" })
 
-    ; numbers := computed([count, doubleCount, sum], (c,d,s) => [c,d,s], { name: "numbers" })
     numbers := computed([count, doubleCount, sum], (c,d,s) => Map("count", c, "doubled", d, "sum", s ), { name: "numbers" })
 
     handleIncrement(*) {
