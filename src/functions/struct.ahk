@@ -42,7 +42,7 @@ class Struct {
             this._keys := []
             this._values := []
 
-            this.validateFields(data, typeMap)
+            this._validateFields(data, typeMap)
 
             for key, val in (data is Map ? data : data.OwnProps()) {
                 k := key
@@ -57,42 +57,12 @@ class Struct {
 
                 ; array of a certain type
                 if (val is Array) {
-                    ; array of same type values, e.g. [String]
-                    if (!ArrayExt.every(val, item => item is typeMap[k][1])) {
-                        throw TypeError(Format(
-                            "Expected item type of index:{1} does not match.`n`nExpected: {2}, current: {3}",
-                            ArrayExt.findIndex(val, item => Type(item) != typeMap[k][1]),
-                            this.getTypeName(typeMap[k][1]),
-                            Type(ArrayExt.find(val, item => Type(item) != typeMap[k][1]))
-                        ))
-                    }
+                    this._validateArrayTypes(val, typeMap, key)
                 }
-                ; primitive 
+
+                ; primitive
                 if (val is Primitive) {
-                    ; literal type
-                    if (typeMap[k] is Primitive) {
-                        if (val != typeMap[k]) {
-                            errMsg := Format("Type mismatch.`n`nExpected: {1}, current: {2}", typeMap[k], val)
-                            throw ValueError(errMsg, -1, val)
-                        }
-                    }
-                    ; literal types
-                    else if (typeMap[k] is Array && ArrayExt.every(typeMap[k], t => t is Primitive)) {
-                        if (!ArrayExt.find(typeMap[k], item => item = v)) {
-                            errMsg := Format("Type mismatch.`n`nAssignables: {1}", ArrayExt.join(typeMap[k], " | "))
-                            throw ValueError(errMsg, -1, val)
-                        }
-                    }
-                    else {
-                        if (Type(val) != this.getTypeName(typeMap[k])) {
-                            throw TypeError(Format(
-                                "Expected value type of key:{1} does not match.`n`nExpected: {2}, current: {3}",
-                                key,
-                                this.getTypeName(typeMap[key]),
-                                Type(val)
-                            ))
-                        }
-                    }
+                    this._validatePrimitiveType(val, typeMap, key)
                 }
 
                 this._values.Push(val)
@@ -123,39 +93,11 @@ class Struct {
                 }
                 ; array item validation
                 else if (value is Array) {
-                    if (this.typeMap[key] is Array && value.every(item => Type(item) != TypeChecker.getTypeName(this.typeMap[key][1]))) {
-                        throw TypeError(Format(
-                            "Expected item type of index:{1} does not match.`n`nExpected: {2}, current: {3}",
-                            ArrayExt.findIndex(value, item => Type(item) != this.typeMap[key][1]),
-                            this.getTypeName(this.typeMap[key][1]),
-                            Type(ArrayExt.find(value, item => Type(item) != this.typeMap[key][1]))
-                        ))
-                    }
+                    this._validateArrayTypes(value, this.typeMap, key)
                 }
                 ; primitives
                 else if (value is Primitive) {
-                    ; literal type
-                    if (this.typeMap[key] is Primitive) {
-                        errMsg := Format("Type mismatch.`n`nExpected: {1}, current: {2}", this.typeMap[key], value)
-                        throw ValueError(errMsg, -1, value)
-                    }
-                    ; literal types
-                    else if (this.typeMap[key] is Array && ArrayExt.every(this.typeMap[key], t => t is Primitive)) {
-                        if (!ArrayExt.find(this.typeMap[key], item => item = value)) {
-                            errMsg := Format("Type mismatch.`n`nAssignables: {1}", ArrayExt.join(this.typeMap[key], " | "))
-                            throw ValueError(errMsg, -1, value)
-                        }
-                    }
-                    else {
-                        if (Type(value) != TypeChecker.getTypeName(this.typeMap[key])) {
-                            throw TypeError(Format(
-                                "Expected value type of key:{1} does not match.`n`nExpected: {2}, current: {3}",
-                                key,
-                                this.getTypeName(this.typeMap[key]),
-                                Type(value)
-                            ))
-                        }
-                    }
+                    this._validatePrimitiveType(value, this.typeMap, key)
                 }
 
                 this._values := this._values.with(this._keys.findIndex(item => item = key), value)
@@ -183,58 +125,16 @@ class Struct {
             }
         }
 
-        getTypeName(classType) {
-            if (classType is Struct) {
-                return "Struct"
-            }
-
+        _getTypeName(classType) {
             if (classType is Array) {
-                itemType := this.getTypeName(classType[1])
-                return "Array of " . itemType . "s"
+                itemType := this._getTypeName(classType[1])
+                return "Array<" . itemType . ">"
             }
 
-            switch classType {
-                ; primitives
-                case Number:
-                    return "Number"
-                case Integer:
-                    return "Integer"
-                case Float:
-                    return "Float"
-                case String:
-                    return "String"
-
-                    ; objects
-                case Func:
-                    return "Func"
-                case Enumerator:
-                    return "Enumerator"
-                case Closure:
-                    return "Closure"
-                case Class:
-                    return "Class"
-                case Map:
-                    return "Map"
-                case Array:
-                    return "Array"
-                case Buffer:
-                    return "Buffer"
-                case ComObject:
-                    return "ComObject"
-                case Gui:
-                    return "Gui"
-
-                    ; AddReactive funcs
-                case OrderedMap:
-                    return "OrderedMap"
-
-                    ; Object
-                case Object:
-                    return "Object"
-            }
+            return classType.Prototype.__Class
         }
 
-        validateFields(data, typeMap) {
+        _validateFields(data, typeMap) {
             errMsg := "Struct fields not match, {1}: `"{2}`""
             dataKeys := []
 
@@ -258,6 +158,51 @@ class Struct {
                 k := key
                 if (!ArrayExt.find(dataKeys, dKey => dKey = k)) {
                     throw ValueError(Format(errMsg, "missing", key))
+                }
+            }
+        }
+
+        _validateArrayTypes(value, typeMap, key) {
+            ; array of a certain type
+            if !(typeMap[key] is Array) {
+                throw TypeError(Format(
+                    "Type mismatch .`n`nExpected: {1}, current: {2}",
+                    this._getTypeName(typeMap[key]),
+                    Type(value),
+                ))
+            }
+            ; array of same type values, e.g. [String]
+            else if (mismatchedIndex := ArrayExt.findIndex(value, item => !(item is typeMap[key][1]))) {
+                throw TypeError(Format(
+                    "Expected item type of index:{1} does not match.`n`nExpected: {2}, current: {3}",
+                    mismatchedIndex,
+                    this._getTypeName(typeMap[key][1]),
+                    Type(value[mismatchedIndex])
+                ))
+            }
+        }
+
+        _validatePrimitiveType(value, typeMap, key) {
+            ; literal type
+            if (typeMap[key] is Primitive) {
+                if (value != typeMap[key]) {
+                    throw TypeError(Format("Type mismatch.`n`nExpected: {1}, current: {2}", typeMap[key], value), -1, value)
+                }
+            }
+            ; literal types
+            else if (typeMap[key] is Array && ArrayExt.every(typeMap[key], t => t is Primitive)) {
+                if (!ArrayExt.find(typeMap[key], item => item = value)) {
+                    throw TypeError(Format("Type mismatch.`n`nAssignables: {1}", ArrayExt.join(typeMap[key], " | ")), -1, value)
+                }
+            }
+            else {
+                if !(value is typeMap[key]) {
+                    throw TypeError(Format(
+                        "Expected value type of key:`"{1}`" does not match.`n`nExpected: {2}, current: {3}",
+                        key,
+                        this._getTypeName(typeMap[key]),
+                        Type(value)
+                    ))
                 }
             }
         }
