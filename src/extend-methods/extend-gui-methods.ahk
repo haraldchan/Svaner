@@ -207,10 +207,15 @@ class GuiExt {
      * @param eventCallback The callback function when event is raised.
      * @returns {Gui.Control} 
      */
-    static onChange(control, eventCallback) {
-        control.OnEvent("Change", eventCallback)
+    static onChange(control, eventCallback, delay := 0) {
+        if (delay) {
+            inner() => eventCallback(control, 0)
+            delayedCallback() => SetTimer(inner, 0 - delay)
+        }
 
-        return control
+        control.OnEvent("Change", !delay ? eventCallback : (ctrl, info) => delayedCallback())
+
+        return this
     }
 
     /**
@@ -332,5 +337,33 @@ class GuiExt {
         control.OnEvent("ItemSelect", eventCallback)
 
         return control
+    }
+
+    /**
+     * Gets the selection range(cursor position) of a Gui.Edit
+     * @param {Gui.Edit} edit 
+     * @returns {[start, end]} 
+     */
+    static editGetCaret(edit) {
+        s := Buffer(4, 0)
+        e := Buffer(4, 0)
+        EM_GETSEL := 0xB0
+
+        SendMessage(EM_GETSEL, s.Ptr, e.Ptr, edit)
+        start := NumGet(s, "UInt")
+        end := NumGet(e, "UInt")
+        
+        return [start, end]
+    }
+
+    /**
+     * Sets the selection range(cursor position) of a Gui.Edit
+     * @param {Gui.Edit} edit 
+     * @param position
+     */
+    static editSetCaret(edit, start, end?) {
+        EM_SETSEL := 0xB1
+
+        SendMessage(EM_SETSEL, start, IsSet(end) ? end : start, edit)   
     }
 }

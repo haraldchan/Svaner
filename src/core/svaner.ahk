@@ -147,7 +147,7 @@ class Svaner {
 
     /**
      * Define custom directives.
-     * @param {[string, ()=>void, *]} directiveDescriptor 
+     * @param {[String, String | ()=>void, *]} directiveDescriptor 
      */
     defineDirectives(directiveDescriptor*) {
         this.optParser.defineDirectives(Map(directiveDescriptor*))
@@ -953,8 +953,25 @@ class Svaner {
          * @param eventCallback The callback function when event is raised.
          * @returns {Svaner.Control} 
          */
-        onChange(eventCallback) {
-            this.ctrl.OnEvent("Change", eventCallback)
+        onChange(eventCallback, delay := 0) {
+            callbackToSet := ""
+            if (delay) {
+                inner() {
+                    (this.ctrl is Gui.Edit && caretPos := GuiExt.editGetCaret(this.ctrl)[1])
+                    eventCallback(this.ctrl, 0)
+                    (this.ctrl is Gui.Edit && GuiExt.editSetCaret(this.ctrl, caretPos))
+                }
+                callbackToSet := delayedCallback(*) => SetTimer(inner, 0 - delay)
+            } else {
+                withParams(ctrl, info) {
+                    (this.ctrl is Gui.Edit && caretPos := GuiExt.editGetCaret(this.ctrl)[1])
+                    eventCallback(ctrl, info)
+                    (this.ctrl is Gui.Edit && GuiExt.editSetCaret(this.ctrl, caretPos))
+                }
+                callbackToSet := withParams
+            }
+
+            this.ctrl.OnEvent("Change", callbackToSet)
 
             return this
         }
