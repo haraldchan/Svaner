@@ -61,7 +61,6 @@ MouseSpy_Settings(App, config, MouseSpyWindowTitle) {
     }
     
     handleSetHotkeys(ctrl, _) {
-        ; curHotkeyName := StrReplace(ctrl.Name, "-hotkey", "")
         curHotkeyName := pipe(
             name => StrReplace(name, "-hotkey", ""),
             name => StrSplit(name, "-"),
@@ -88,6 +87,10 @@ MouseSpy_Settings(App, config, MouseSpyWindowTitle) {
         handleConfigUpdate()
     }
 
+    App.defineDirectives(
+        "@use:setting-item-text", "xs10 yp+22 w100 h20 0x200"
+    )
+
     return (
         StackBox(App,
             {
@@ -95,16 +98,16 @@ MouseSpy_Settings(App, config, MouseSpyWindowTitle) {
                 fontOptions: "s10 bold",
                 groupbox: {
                     title: "Record Options",
-                    options: "Section w345 h80"
+                    options: "Section @align[xyw]:window-info-stackbox h80"
                 }
             },
             () => [
                 ; anchor marking
-                App.AddText("xs10 yp+22 w100 h20 0x200", "Mark Anchor:"),
+                App.AddText("@use:setting-item-text", "Mark Anchor:"),
                 App.AddHotkey("vmark-anchor-hotkey x+10", config["hotkeys"]["markAnchor"]).onChange(handleSetHotkeys),
                 
                 ; move to anchor
-                App.AddText("xs10 yp+25 w100 h20 0x200", "Move to Anchor:"),
+                App.AddText("@use:setting-item-text yp+25", "Move to Anchor:"),
                 App.AddHotkey("vmove-to-anchor-hotkey x+10", config["hotkeys"]["moveToAnchor"]).onChange(handleSetHotkeys)
             ]
         ),
@@ -115,12 +118,12 @@ MouseSpy_Settings(App, config, MouseSpyWindowTitle) {
                 fontOptions: "s10 bold",
                 groupbox: {
                     title: "Misc",
-                    options: "Section w345 x22 y+5 h160"
+                    options: "Section @align[xw]:window-info-stackbox y+5 h160"
                 }
             },
             () => [
                 ; refresh interval
-                App.AddText("xs10 yp+22 w100 h20 0x200", "Update Interval:"),
+                App.AddText("@use:setting-item-text", "Update Interval:"),
                 App.AddEdit("vupdate-interval x+10 w110 h20 Number", config["misc"]["updateInterval"]).onBlur(handleUpdateIntervalUpdate),
                 App.AddText("x+5 w50 h20 0x200", "ms"),
             ]

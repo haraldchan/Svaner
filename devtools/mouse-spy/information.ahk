@@ -94,10 +94,10 @@ MouseSpy_Information(App, config, AppWindowTitle, suspendText) {
         })
     }
 
-    style := {
-        labelText: "xs10 yp+25 w60 h20 0x200",
-        editLong: "x+10 w250 h20 ReadOnly",
-    }
+    App.defineDirectives(
+        "@use:label-text", "xs10 yp+25 w60 h20 0x200",
+        "@use:edit-long", "x+10 w250 h20 ReadOnly"
+    )
 
     return (
         StackBox(App,
@@ -106,20 +106,20 @@ MouseSpy_Information(App, config, AppWindowTitle, suspendText) {
                 fontOptions: "s10 bold",
                 groupbox: {
                     title: "Window Info",
-                    options: "Section w345 h160"
+                    options: "vwindow-info-stackbox Section w345 h160"
                 }
             },
             () => [
-                App.AddText(style.labelText, "Win Title:"),
-                App.AddEdit(style.editLong,  "{1}", curWindowInfo, ["winTitle"]),
-                App.AddText(style.labelText, "Win Class:"),
-                App.AddEdit(style.editLong,  "ahk_class {1}", curWindowInfo, ["ahkClass"]),
-                App.AddText(style.labelText, "Win Exe:"),
-                App.AddEdit(style.editLong,  "ahk_exe {1}", curWindowInfo, ["ahkExe"]),
-                App.AddText(style.labelText, "Win PID:"),
-                App.AddEdit(style.editLong,  "ahk_pid {1}", curWindowInfo, ["ahkPid"]),
-                App.AddText(style.labelText, "Win ID:"),
-                App.AddEdit(style.editLong,  "ahk_id {1}", curWindowInfo, ["ahkId"]),
+                App.AddText("@use:label-text", "Win Title:"),
+                App.AddEdit("@use:edit-long",  "{1}", curWindowInfo, ["winTitle"]),
+                App.AddText("@use:label-text", "Win Class:"),
+                App.AddEdit("@use:edit-long",  "ahk_class {1}", curWindowInfo, ["ahkClass"]),
+                App.AddText("@use:label-text", "Win Exe:"),
+                App.AddEdit("@use:edit-long",  "ahk_exe {1}", curWindowInfo, ["ahkExe"]),
+                App.AddText("@use:label-text", "Win PID:"),
+                App.AddEdit("@use:edit-long",  "ahk_pid {1}", curWindowInfo, ["ahkPid"]),
+                App.AddText("@use:label-text", "Win ID:"),
+                App.AddEdit("@use:edit-long",  "ahk_id {1}", curWindowInfo, ["ahkId"]),
             ]
         ),
 
@@ -129,22 +129,22 @@ MouseSpy_Information(App, config, AppWindowTitle, suspendText) {
                 fontOptions: "s10 bold",
                 groupbox: {
                     title: "Mouse Position",
-                    options: "Section x22 y+5 w345 h110"
+                    options: "Section @align[xw]:window-info-stackbox y+5 h110"
                 }
             },
             () => [
                 ; Screen
                 App.AddText("xs10 yp+25 w60 h20 0x200", "Screen:"),
-                App.AddEdit(style.editLong, "{1}, {2}", curMouseInfo, [v => v["Screen"]["x"], v => v["Screen"]["y"]]),
+                App.AddEdit("@use:edit-long", "{1}, {2}", curMouseInfo, [v => v["Screen"]["x"], v => v["Screen"]["y"]]),
 
                 ; Client
                 App.AddText("xs10 yp+25 w60 h20 0x200", "Client:"),
-                App.AddEdit(style.editLong, "{1}, {2}", curMouseInfo, [v => v["Client"]["x"], v => v["Client"]["y"]]),
+                App.AddEdit("@use:edit-long", "{1}, {2}", curMouseInfo, [v => v["Client"]["x"], v => v["Client"]["y"]]),
 
                 ; color
                 App.AddText("xs10 yp+25 w50 h20 0x200", "Color: "),
                 App.AddText("vcolor-indicator x+0 w20 h20 0x200", "■"),
-                App.AddEdit(style.editLong . " x+0 ", "{1}", curMouseInfo, ["color"]),                
+                App.AddEdit("@use:edit-long x+0", "{1}", curMouseInfo, ["color"]),                
             ]
         ),
 
@@ -154,18 +154,18 @@ MouseSpy_Information(App, config, AppWindowTitle, suspendText) {
                 fontOptions: "s10 bold",
                 groupbox: {
                     title: "Anchoring / Distance",
-                    options: "Section x22 y+5 w345 h250"
+                    options: "Section @align[xw]:window-info-stackbox y+5 h250"
                 }    
             },
             () => [
-                App.AddText(style.labelText, "Screen:"), 
+                App.AddText("@use:label-text", "Screen:"), 
                 App.AddEdit("x+10 w80 ReadOnly", "{1}, {2}", anchorPos, [v => v["Screen"]["x"], v => v["Screen"]["y"]]),
                 App.AddText("x+30 w50 h20 0x200", "Client:"), 
                 App.AddEdit("x+10 w80 ReadOnly", "{1}, {2}", anchorPos, [v => v["Client"]["x"], v => v["Client"]["y"]]),
 
                 ; relative distance
-                App.AddText(style.labelText . " yp+30", "Distance:"),
-                App.AddEdit(style.editLong, "x {1}, y {2}", distance, ["x", "y"]),
+                App.AddText("@use:label-text" . " yp+30", "Distance:"),
+                App.AddEdit("@use:edit-long", "x {1}, y {2}", distance, ["x", "y"]),
 
                 ; anchor types
                 App.AddText("xs10 yp+35 w150 h20 0x200", "Anchor Type").SetFont("s9 bold"),

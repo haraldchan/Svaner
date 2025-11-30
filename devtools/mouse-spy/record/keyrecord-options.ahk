@@ -32,7 +32,7 @@ MouseSpy_Record_KeyRecordOptions(App, props) {
     })
 
     lvOptions := {
-        lvOptions: "xs10 w330 y+10 r3"
+        lvOptions: "xs10 w325 y+10 r3"
     }
 
     columnDetails := {
@@ -54,7 +54,7 @@ MouseSpy_Record_KeyRecordOptions(App, props) {
 
     comp.render := this => this.Add(
         App.AddButton("vkey-record-toggler xs10 y110 w80 h20", "Start").onClick((*) => isKeyRecording.set(true)),
-        App.AddCheckbox("vreplace-sleep x+10 w210 h20", "Replace `"Sleep`" with Step Filler"),
+        App.AddCheckbox("vreplace-sleep x+30 w210 h20", "Replace `"Sleep`" with Step Filler"),
         ; key history log
         App.AddListView(lvOptions, columnDetails, logLinePrint)
     )
