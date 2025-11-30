@@ -17,6 +17,8 @@ MouseSpy_Record(App, config) {
     recordedLog := signal("CoordMode(`"Mouse`", `"Screen`")", { name: "recordedLog" })
     isKeyRecording := signal(false, { name: "isKeyRecording" })
 
+    effect(recordedLog, () => SendMessage(EM_LINESCROLL := 0xB6, 0, 999999, App["recorded-log"]))
+
     handleRecordModeSetting(ctrl, _) {
         if (ctrl.Text == "Click Step") {
             curRecordMode.set("clickStep")
@@ -30,10 +32,6 @@ MouseSpy_Record(App, config) {
         logMouseCoordMode.set(ctrl.Text)
 
         recordedLog.set(recordedLog.value . "`r`n" . Format("CoordMode(`"Mouse`", `"{}`")", logMouseCoordMode.value))
-    }
-
-    handleLogReset(*) {
-        recordedLog.set(Format("CoordMode(`"Mouse`", `"{}`")", logMouseCoordMode.value))
     }
 
     handleLogExport(*) {
@@ -59,7 +57,7 @@ MouseSpy_Record(App, config) {
                 fontOptions: "s10 bold",
                 groupbox: {
                     title: "Record Options",
-                    options: "Section w345 h175"
+                    options: "Section @align[xyw]:window-info-stackbox h175"
                 }
             },
             () => [                
@@ -89,7 +87,7 @@ MouseSpy_Record(App, config) {
                 fontOptions: "s10 bold",
                 groupbox: {
                     title: "Record Log",
-                    options: "Section x22 y+5 w345 h420"
+                    options: "Section @align[xw]:window-info-stackbox y+5 h420"
                 }
             },
             () => [
@@ -100,10 +98,10 @@ MouseSpy_Record(App, config) {
                 App.AddCheckBox("x+10 w60 h20", "Relative").onClick((ctrl, _) => useRelative.set(ctrl.Value)),
 
                 ; log code
-                App.AddEdit("xs10 yp+25 w325 r23 0x40", "{1}", recordedLog).onBlur((ctrl, _) => recordedLog.set(ctrl.Value)),
+                App.AddEdit("vrecorded-log xs10 yp+25 w325 r23", "{1}", recordedLog).onChange((ctrl, _) => recordedLog.set(ctrl.Value)),
                 App.AddButton("xs80 y+8 w80 h20", "Export").onClick(handleLogExport),
                 App.AddButton("x+10 w80 h20", "Copy").onClick((*) => A_Clipboard := recordedLog.value),
-                App.AddButton("x+10 w80 h20", "Clear").onClick(handleLogReset)
+                App.AddButton("x+10 w80 h20", "Clear").onClick((*) => recordedLog.reset())
             ]
         )
     )
