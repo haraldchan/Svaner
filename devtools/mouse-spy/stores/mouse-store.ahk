@@ -17,7 +17,6 @@ mouseStore := useStore("mouseStore", {
             CoordMode("Mouse", "Screen"),
             MouseGetPos(&initScreenX, &initScreenY, &window, &control),
             CoordMode("Pixel", "Screen"),
-            color := PixelGetColor(initScreenX, initScreenY),
             CoordMode("Mouse", "Client"),
             MouseGetPos(&initClientX, &initClientY),
             ; return 
@@ -28,11 +27,11 @@ mouseStore := useStore("mouseStore", {
                     Client: { x: Integer(initClientX), y: Integer(initClientY) },
                     window: window,
                     control: control,
-                    color: color
+                    color: PixelGetColor(initScreenX, initScreenY)
                 }
         ),
         moveToAnchor: (this, params*) => (
-            CoordMode("Mouse", this.curMouseCoordMode.value)
+            CoordMode("Mouse", this.curMouseCoordMode.value),
             MouseMove(this.anchorPos.value[A_CoordModeMouse]["x"], this.anchorPos.value[A_CoordModeMouse]["y"])
         )
     }
