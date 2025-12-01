@@ -1,43 +1,3 @@
-class SvanerText extends Svaner.Control {
-    /**
-     * Add a reactive Text control to Gui
-     * @param {Gui} GuiObject The target Gui Object.
-     * @param {string} options Options apply to the control, same as Gui.Add.
-     * @param {string} content Text or formatted text to hold signal values.
-     * @param {signal} [depend] Subscribed signal
-     * @param {array} [key] the keys or index of the signal's value
-     * @returns {SvanerText}     
-     */
-    __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
-        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
-        TypeChecker.checkType(content, [String, Number], "Parameter #2 (content) is not a String")
-        TypeChecker.checkTypeDepend(depend)
-
-        this.key := key
-        super.__New(GuiObject, "Text", options, content, depend, key)
-    }
-}
-
-class SvanerEdit extends Svaner.Control {
-    /**
-     * Add a reactive Edit control to Gui
-     * @param {Gui} GuiObject The target Gui Object.
-     * @param {string} options Options apply to the control, same as Gui.Add.
-     * @param {string} content Text or formatted text to hold signal values.
-     * @param {signal} [depend] Subscribed signal.
-     * @param {array} [key] the keys or index of the signal's value.
-     * @returns {SvanerEdit}     
-     */
-    __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
-        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
-        TypeChecker.checkType(content, [String, Number], "Parameter #2 (content) is not a String")
-        TypeChecker.checkTypeDepend(depend)
-
-        this.key := key
-        super.__New(GuiObject, "Edit", options, content, depend, key)
-    }
-}
-
 class SvanerButton extends Svaner.Control {
     /**
      * Add a reactive Button control to Gui
@@ -57,6 +17,7 @@ class SvanerButton extends Svaner.Control {
         super.__New(GuiObject, "Button", options, content, depend, key)
     }
 }
+
 
 class SvanerCheckBox extends Svaner.Control {
     /**
@@ -78,25 +39,38 @@ class SvanerCheckBox extends Svaner.Control {
     }
 }
 
-class SvanerRadio extends Svaner.Control {
+
+class SvanerComboBox extends Svaner.Control {
+    __New(GuiObject, options, depend := 0, key := 0) {
+        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
+        TypeChecker.checkTypeDepend(depend)
+
+        this.key := key
+        super.__New(GuiObject, "ComboBox", options, , depend, key)
+    }
+}
+
+
+class SvanerDateTime extends Svaner.Control {
     /**
-     * Add a reactive Radio control to Gui
+     * Add a reactive GroupBox control to Gui
      * @param {Gui} GuiObject The target Gui Object.
      * @param {string} options Options apply to the control, same as Gui.Add.
      * @param {string} content Text or formatted text to hold signal values.
      * @param {signal} [depend] Subscribed signal
      * @param {array} [key] the keys or index of the signal's value
-     * @returns {SvanerRadio}     
+     * @returns {SvanerDateTime}     
      */
-    __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
+    __New(GuiObject, options := "", dateFormat := "", depend := 0, key := 0) {
         TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
-        TypeChecker.checkType(content, [String, Number], "Parameter #2 (content) is not a String")
+        ; TypeChecker.checkType(dateFormat, IsTime, "Parameter #2 (content) is not a String")
         TypeChecker.checkTypeDepend(depend)
 
         this.key := key
-        super.__New(GuiObject, "Radio", options, content, depend, key)
+        super.__New(GuiObject, "DateTime", options, dateFormat, depend)
     }
 }
+
 
 class SvanerDropDownList extends Svaner.Control {
     __New(GuiObject, options, depend := 0, key := 0) {
@@ -108,15 +82,48 @@ class SvanerDropDownList extends Svaner.Control {
     }
 }
 
-class SvanerComboBox extends Svaner.Control {
-    __New(GuiObject, options, depend := 0, key := 0) {
+
+class SvanerEdit extends Svaner.Control {
+    /**
+     * Add a reactive Edit control to Gui
+     * @param {Gui} GuiObject The target Gui Object.
+     * @param {string} options Options apply to the control, same as Gui.Add.
+     * @param {string} content Text or formatted text to hold signal values.
+     * @param {signal} [depend] Subscribed signal.
+     * @param {array} [key] the keys or index of the signal's value.
+     * @returns {SvanerEdit}     
+     */
+    __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
         TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
+        TypeChecker.checkType(content, [String, Number], "Parameter #2 (content) is not a String")
         TypeChecker.checkTypeDepend(depend)
 
         this.key := key
-        super.__New(GuiObject, "ComboBox", options, , depend, key)
+        super.__New(GuiObject, "Edit", options, content, depend, key)
     }
 }
+
+
+class SvanerGroupBox extends Svaner.Control {
+    /**
+     * Add a reactive GroupBox control to Gui
+     * @param {Gui} GuiObject The target Gui Object.
+     * @param {string} options Options apply to the control, same as Gui.Add.
+     * @param {string} content Text or formatted text to hold signal values.
+     * @param {signal} [depend] Subscribed signal
+     * @param {array} [key] the keys or index of the signal's value
+     * @returns {SvanerGroupBox}     
+     */
+    __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
+        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
+        TypeChecker.checkType(content, String, "Parameter #2 (content) is not a String")
+        TypeChecker.checkTypeDepend(depend)
+
+        this.key := key
+        super.__New(GuiObject, "GroupBox", options, content, depend, key)
+    }
+}
+
 
 class SvanerListView extends Svaner.Control {
     /**
@@ -179,45 +186,94 @@ class SvanerListView extends Svaner.Control {
     }
 }
 
-class SvanerGroupBox extends Svaner.Control {
+
+class SvanerMonthCal extends Svaner.Control {
+    __New(GuiObject, options := "", depend := 0) {
+        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
+        TypeChecker.checkType(depend, signal, "Parameter #2 (depend) is not a signal")
+
+        super.__New(GuiObject, "MonthCal", options,, depend)
+    }
+}
+
+
+class SvanerPicture extends Svaner.Control {
     /**
-     * Add a reactive GroupBox control to Gui
+     * Add a reactive Text control to Gui
      * @param {Gui} GuiObject The target Gui Object.
      * @param {string} options Options apply to the control, same as Gui.Add.
      * @param {string} content Text or formatted text to hold signal values.
      * @param {signal} [depend] Subscribed signal
      * @param {array} [key] the keys or index of the signal's value
-     * @returns {SvanerGroupBox}     
+     * @returns {SvanerPicture}     
      */
-    __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
+    __New(GuiObject, options := "", depend := 0, key := 0) {
         TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
-        TypeChecker.checkType(content, String, "Parameter #2 (content) is not a String")
         TypeChecker.checkTypeDepend(depend)
 
         this.key := key
-        super.__New(GuiObject, "GroupBox", options, content, depend, key)
+        super.__New(GuiObject, "Picture", options, depend.value, depend, key)
     }
 }
 
-class SvanerDateTime extends Svaner.Control {
+
+class SvanerRadio extends Svaner.Control {
     /**
-     * Add a reactive GroupBox control to Gui
+     * Add a reactive Radio control to Gui
      * @param {Gui} GuiObject The target Gui Object.
      * @param {string} options Options apply to the control, same as Gui.Add.
      * @param {string} content Text or formatted text to hold signal values.
      * @param {signal} [depend] Subscribed signal
      * @param {array} [key] the keys or index of the signal's value
-     * @returns {SvanerDateTime}     
+     * @returns {SvanerRadio}     
      */
     __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
         TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
-        TypeChecker.checkType(content, String, "Parameter #2 (content) is not a String")
+        TypeChecker.checkType(content, [String, Number], "Parameter #2 (content) is not a String")
         TypeChecker.checkTypeDepend(depend)
 
         this.key := key
-        super.__New(GuiObject, "DateTime", options, content, depend, key)
+        super.__New(GuiObject, "Radio", options, content, depend, key)
     }
 }
+
+
+class SvanerSlider extends Svaner.Control {
+    /**
+     * Add a reactive Slider control to Gui
+     * @param GuiObject The target Gui Object.
+     * @param {String} options Options apply to the control, same as Gui.Add.
+     * @param {signal} [depend] Subscribed signal.
+     */
+    __New(GuiObject, options := "", depend := 0) {
+        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
+        TypeChecker.checkType(depend, signal, "Parameter #2 (depend) is not a signal")
+
+        super.__New(GuiObject, "Slider", options,, depend)
+    }
+}
+
+
+class SvanerText extends Svaner.Control {
+    /**
+     * Add a reactive Text control to Gui
+     * @param {Gui} GuiObject The target Gui Object.
+     * @param {string} options Options apply to the control, same as Gui.Add.
+     * @param {string} content Text or formatted text to hold signal values.
+     * @param {signal} [depend] Subscribed signal
+     * @param {array} [key] the keys or index of the signal's value
+     * @returns {SvanerText}     
+     */
+    __New(GuiObject, options := "", content := "", depend := 0, key := 0) {
+        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
+        TypeChecker.checkType(content, [String, Number], "Parameter #2 (content) is not a String")
+        TypeChecker.checkTypeDepend(depend)
+
+        this.key := key
+        super.__New(GuiObject, "Text", options, content, depend, key)
+    }
+}
+
 
 class SvanerTreeView extends Svaner.Control {
     __New(GuiObject, options := "", depend := 0, key := 0) {
@@ -391,25 +447,5 @@ class SvanerTreeView extends Svaner.Control {
 
             return newShadowNode
         }
-    }
-}
-
-
-class SvanerPicture extends Svaner.Control {
-    /**
-     * Add a reactive Text control to Gui
-     * @param {Gui} GuiObject The target Gui Object.
-     * @param {string} options Options apply to the control, same as Gui.Add.
-     * @param {string} content Text or formatted text to hold signal values.
-     * @param {signal} [depend] Subscribed signal
-     * @param {array} [key] the keys or index of the signal's value
-     * @returns {SvanerPicture}     
-     */
-    __New(GuiObject, options := "", depend := 0, key := 0) {
-        TypeChecker.checkType(options, String, "Parameter #1 (options) is not a String")
-        TypeChecker.checkTypeDepend(depend)
-
-        this.key := key
-        super.__New(GuiObject, "Picture", options, depend.value, depend, key)
     }
 }

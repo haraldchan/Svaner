@@ -123,10 +123,12 @@ class Svaner {
      * @param {Array<Func>} callbacks 
      */
     __applyCallbackDirectives(control, callbacks) {
-        if (callbacks) {
-            for callback in callbacks {
-                callback(control)
-            }
+        if (!callbacks) {
+            return
+        }
+            
+        for callback in callbacks {
+            callback(control)
         }
     }
 
@@ -195,33 +197,36 @@ class Svaner {
 
 
     /**
-     * 
-     * @param options 
-     * @param {signal|Array} dependOrList 
-     * @param {String|Array|Object} [key] the keys or index of the signal's value.
+     * Add a ComboBox/SvanerComboBox control to Gui.
+     * @param options Options/Directives apply to the control.
+     * @param {Array | signal} listOrDepend List items/ Subsribed signal
+     * @param {String | Array | Object} [key] the keys or index of the signal's value.
      * @returns {SvanerComboBox | Gui.ComboBox} 
      */
-    AddComboBox(options, dependOrList := [], key?) {
+    AddComboBox(options, listOrDepend := [], key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := dependOrList is signal
-            ? SvanerComboBox(this.gui, parsedOptions.parsed, dependOrList, (IsSet(key) ? key : 0))
-            : this.gui.AddComboBox(parsedOptions.parsed, dependOrList)
+        control := listOrDepend is signal
+            ? SvanerComboBox(this.gui, parsedOptions.parsed, listOrDepend, (IsSet(key) ? key : 0))
+            : this.gui.AddComboBox(parsedOptions.parsed, listOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
 
     /**
-     * 
-     * @param {String} options 
-     * @param {String} dateFormat 
+     * Add a DateTime/SvanerDateTime control to Gui.
+     * @param {String} options Options/Directives apply to the control.
+     * @param {String} dateFormat Date Format to show.
+     * @param {signal} [depend] Subsribed signal.
      * @returns {Gui.DateTime} 
      */
-    AddDateTime(options, dateFormat := "ShortDate") {
+    AddDateTime(options, dateFormat := "YYYYMMDDHH24MISS", depend?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddDateTime(parsedOptions.parsed, dateFormat)
+        control := IsSet(depend) 
+            ? SvanerDateTime(this.gui, parsedOptions.parsed, dateFormat, depend)
+            : this.gui.AddDateTime(parsedOptions.parsed, dateFormat)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
@@ -229,25 +234,31 @@ class Svaner {
 
 
     /**
-     * 
-     * @param options 
-     * @param {signal | Array} dependOrList 
+     * Add a DropDownList/DropDownList control to Gui.
+     * @param options Options/Directives apply to the control.
+     * @param {Array | signal} listOrDepend List items/ Subsribed signal.
      * @param {String | Array | Object} [key] the keys or index of the signal's value.
      * @returns {SvanerDropDownList | Gui.DDL} 
      */
-    AddDropDownList(options, dependOrList, key?) {
+    AddDropDownList(options, listOrDepend, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := dependOrList is signal
-            ? SvanerDropDownList(this.gui, parsedOptions.parsed, dependOrList)
-            : this.gui.AddDDL(parsedOptions.parsed, dependOrList)
+        control := listOrDepend is signal
+            ? SvanerDropDownList(this.gui, parsedOptions.parsed, listOrDepend)
+            : this.gui.AddDDL(parsedOptions.parsed, listOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
-
         return control
     }
-    AddDDL(options, dependOrList, key?) => this.AddDropDownList(options, dependOrList, (IsSet(key) ? key : 0))
-
-
+    /**
+     * Add a DropDownList/DropDownList control to Gui.
+     * @param options Options/Directives apply to the control.
+     * @param {Array | signal} listOrDepend List items/ Subsribed signal.
+     * @param {String | Array | Object} [key] the keys or index of the signal's value.
+     * @returns {SvanerDropDownList | Gui.DDL} 
+     */
+    AddDDL(options, listOrDepend, key?) => this.AddDropDownList(options, listOrDepend, IsSet(key) ? key : 0)
+    
+    
     /**
      * Add a Edit/SvanerEdit control to Gui.
      * @param {String} options Options/Directives apply to the control.
@@ -307,12 +318,32 @@ class Svaner {
      * 
      * @param {String} options 
      * @param {String} text 
+     * @param {Object | Array} [linkInfo] 
      * @returns {Gui.Link} 
      */
-    AddLink(options, text) {
+    AddLink(options := "", text := "", linkInfo?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddLink(parsedOptions.parsed, text)
+        if (IsSet(linkInfo)) {
+            a := "<a href=`"{2}`" id=`"{3}`">{1}</a>"
+
+            if (linkInfo.base == Object.Prototype) {
+                anchorEl := Format(a, linkInfo.text, linkInfo.href, linkInfo.HasOwnProp("id") ? linkInfo.id : "")
+                linkText := Format(text, anchorEl)
+            } 
+            else if (linkInfo is Array) {
+                anchorEls := []
+                for info in linkInfo {
+                    anchorEl := Format(a, info.text, info.href, info.HasOwnProp("id") ? info.id : "")
+                    anchorEls.Push(anchorEl)
+                }
+                linkText := Format(text, anchorEls*)
+            }
+        }
+
+        control := IsSet(linkInfo)
+            ? this.gui.AddLink(parsedOptions.parsed, linkText)
+            : this.gui.AddLink(parsedOptions.parsed, text)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
@@ -372,14 +403,17 @@ class Svaner {
 
 
     /**
-     * 
-     * @param {String} options 
+     * Add a MonthCal/SvanerMonthCal control to Gui.
+     * @param {String} [options] Options/Directives apply to the control.
+     * @param {signal} [depend] Subscribed signal.
      * @returns {Gui.MonthCal} 
      */
-    AddMonthCal(options) {
+    AddMonthCal(options := "", dateOrDepend?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddMonthCal(parsedOptions.parsed)
+        control := IsSet(dateOrDepend) && dateOrDepend is signal
+            ? SvanerMonthCal(this.gui, parsedOptions.parsed, dateOrDepend)
+            : this.gui.AddMonthCal(parsedOptions.parsed, IsSet(dateOrDepend) ? dateOrDepend : FormatTime(A_Now, "yyyyMMdd"))
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
@@ -389,21 +423,28 @@ class Svaner {
     /**
      * Add a Picture/SvanerPicture control to Gui.
      * @param {String} options 
-     * @param {signal | String} dependOrPicFilepath 
+     * @param {String | signal} PicFilepathOrDepend 
      * @param {String | Array | Object} [key] the keys or index of the signal's value.
      * @returns {SvanerPicture | Gui.Pic} 
      */
-    AddPicture(options, dependOrPicFilepath, key?) {
+    AddPicture(options, PicFilepathOrDepend, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := dependOrPicFilepath is signal
-            ? SvanerPicture(this.gui, parsedOptions.parsed, dependOrPicFilepath, (IsSet(key) ? key : 0))
-            : this.gui.AddPicture(options, dependOrPicFilepath)
+        control := PicFilepathOrDepend is signal
+            ? SvanerPicture(this.gui, parsedOptions.parsed, PicFilepathOrDepend, (IsSet(key) ? key : 0))
+            : this.gui.AddPicture(options, PicFilepathOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
     }
-    AddPic(options, dependOrPicFilepath, key?) => this.AddPicture(options, dependOrPicFilepath, (IsSet(key) ? key : 0))
+    /**
+     * Add a Picture/SvanerPicture control to Gui.
+     * @param {String} options 
+     * @param {String | signal} PicFilepathOrDepend 
+     * @param {String | Array | Object} [key] the keys or index of the signal's value.
+     * @returns {SvanerPicture | Gui.Pic} 
+     */
+    AddPic(options, PicFilepathOrDepend, key?) => this.AddPicture(options, PicFilepathOrDepend, IsSet(key) ? key : 0)
 
 
     /**
@@ -443,15 +484,17 @@ class Svaner {
 
 
     /**
-     * 
-     * @param {String} options 
-     * @param {Integer} startingPos 
-     * @returns {Gui.Slider} 
+     * Add a Radio/SvanerRadio control to Gui
+     * @param {String} [options] Options/Directives apply to the control.
+     * @param {Integer | signal} [startingPosOrDepend] Starting position of the slider/ Subsribed signal associates with slider value.
+     * @returns {SvanerSlider | Gui.Slider} 
      */
-    AddSlider(options, startingPos := 0) {
+    AddSlider(options := "", startingPosOrDepend := 0) {
         parsedOptions := this.__parseOptions(options)
 
-        control := this.gui.AddSlider(parsedOptions.parsed, startingPos)
+        control := startingPosOrDepend is signal
+            ? SvanerSlider(this.gui, parsedOptions.parsed, startingPosOrDepend) 
+            : this.gui.AddSlider(parsedOptions.parsed, startingPosOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
@@ -604,7 +647,8 @@ class Svaner {
                 for width in this.colWidths {
                     this.ctrl.ModifyCol(A_Index, width)
                 }
-            } else if (controlType == "TreeView") {
+            } 
+            else if (controlType == "TreeView") {
                 this.ctrl := this.GuiObject.AddTreeView(this.tvOptions)
                 this.shadowTree := SvanerTreeView.ShadowTree(this.ctrl)
                 this._handleTreeViewUpdate()
@@ -617,10 +661,18 @@ class Svaner {
             else if (controlType == "ComboBox" || controlType == "DropDownList") {
                 this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.optionTexts)
             }
+            else if (controlType == "MonthCal") {
+                this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.depend.value)
+            }
+            else if (controlType == "DateTime") {
+                this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.content)
+                this.update(this.depend)
+            }
             else {
                 this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.formattedContent)
             }
-            this.ctrl.arcWrapper := this
+            
+            this.ctrl.svanerWrapper := this
 
             ; add subscribe
             if (!this.depend) {
@@ -843,8 +895,11 @@ class Svaner {
                 this.ctrl.Value := this._handleFormatStr(this.content, this.depend, this.key)
                 return
             }
-
-            if (this.ctrl is Gui.ListView) {
+            else if (this.ctrl is Gui.Slider) {
+                this.ctrl.Value := this.depend.value || 0
+                return 
+            }
+            else if (this.ctrl is Gui.ListView) {
                 ; update from checkStatusDepend
                 if (this.checkStatusDepend == signal) {
                     this.ctrl.Modify(0, this.checkStatusDepend.value == true ? "-Checked" : "+Checked")
@@ -854,13 +909,11 @@ class Svaner {
                 this._handleListViewUpdate()
                 return
             }
-
-            if (this.ctrl is Gui.TreeView) {
+            else if (this.ctrl is Gui.TreeView) {
                 this._handleTreeViewUpdate()
                 return
             }
-
-            if (this.ctrl is Gui.CheckBox) {
+            else if (this.ctrl is Gui.CheckBox) {
                 ; update from checkStatusDepend
                 if (this.checkStatusDepend == signal) {
                     this.ctrl.Value := this.CheckStatusDepend.value
@@ -873,8 +926,7 @@ class Svaner {
                 }
                 return
             }
-
-            if (this.ctrl is Gui.ComboBox || this.ctrl is Gui.DDL) {
+            else if (this.ctrl is Gui.ComboBox || this.ctrl is Gui.DDL) {
                 ; replace the list content
                 this.ctrl.Delete()
                 this.ctrl.Add(signal.value is Array ? signal.value : MapExt.keys(signal.value))
@@ -887,16 +939,19 @@ class Svaner {
                 }
                 return
             }
-
-            if (this.ctrl is Gui.Pic) {
+            else if (this.ctrl is Gui.Pic) {
                 try {
                     this.ctrl.Value := signal.value
                 }
                 return
             }
-
-            ; update text label
-            this.ctrl.Text := this._handleFormatStr(this.content, this.depend, this.key)
+            else if (this.ctrl is Gui.DateTime || this.ctrl is Gui.MonthCal) {
+                this.ctrl.Value := signal.value
+            }
+            else {
+                ; update text label
+                this.ctrl.Text := this._handleFormatStr(this.content, this.depend, this.key)
+            }
 
         }
 
