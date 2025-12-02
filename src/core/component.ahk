@@ -138,7 +138,12 @@ class Component {
         formData := {}
         for ctrl in this.ctrls {
             if (ctrl.name) {
-                formData.DefineProp(ctrl.name, { Value: ctrl.Value })
+                keyName := pipe(
+                    n => StrSplit(n, "-"),
+                    n => ArrayExt.map(n, item => A_Index == 1 ? item : StrTitle(item)),
+                    n => ArrayExt.join(n, "")
+                )(ctrl.name)
+                formData.DefineProp(keyName, { Value: ctrl.Value })
             }
         }
 
