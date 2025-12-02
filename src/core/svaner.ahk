@@ -41,8 +41,8 @@ class Svaner {
         }
 
         ; add svaner control map
-        this.gui.scs := Map()
-        this.gui.scs.Default := ""
+        this.gui.svanerCtrls := Map()
+        this.gui.svanerCtrls.Default := ""
 
         ; set font
         if (SvanerConfigs.HasOwnProp("font")) {
@@ -53,7 +53,7 @@ class Svaner {
         }
 
         ; components
-        this.components := []
+        this.components := Map()
 
         ; add option parser
         this.optParser := OptionParser(this)
