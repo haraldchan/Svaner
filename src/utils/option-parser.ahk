@@ -64,49 +64,105 @@ class OptionParser {
         }
         ; custom directives
         else if (this.customUseDirectives.Has(opt)) {
-            if (!InStr(this.customUseDirectives[opt], "@")) {
-                return Format(" {1} ", this.customUseDirectives[opt])
-            }
-
-            parsed := ""
-            loop parse this.customUseDirectives[opt], " " {
-                res := this.parseDirective(A_LoopField, callbackArray)
-                if (res is Func) {
-                    callbackArray.Push(res)
-                } else {
-                    parsed .= Format(" {1} ", res)
-                }
-            }
-
-            return parsed
+            return this._parseCustomUseDirectives(opt, callbackArray)
         }
-        ; align directive
+        ; align directives
         else if (StringExt.startsWith(opt, "@align[") && InStr(opt, "]:")) {
-            splittedOpts := StrSplit(opt, ":")
-            alignment := splittedOpts[1]
-            targetCtrl := splittedOpts[2]
-
-            this.svaner[targetCtrl].GetPos(&X, &Y, &Width, &Height)
-
-            parsedPos := ""
-            loop parse StringExt.replaceThese(alignment, ["@align[", "]"]), "" {
-                switch StrUpper(A_LoopField) {
-                    case "X":
-                        parsedPos .= Format(" x{1} ", X)
-                    case "Y":
-                        parsedPos .= Format(" y{1} ", Y)
-                    case "W":
-                        parsedPos .= Format(" w{1} ", Width)
-                    case "H":
-                        parsedPos .= Format(" h{1} ", Height)
-                }
-            }
-
-            return parsedPos
+            return this._handleAlignDirectives(opt)
+        }
+        ; relative directives
+        else if (StringExt.startsWith(opt, "@relative[") && InStr(opt, "]:")) {
+            return this._handleRelativeDirectives(opt)
         }
         ; unknown
         else {
             throw ValueError("Unknown directive. `n`nCustom directives must starts with `"@use:`" or `"@func:`".", -1, opt)
+        }
+    }
+
+    _parseCustomUseDirectives(opt, callbackArray) {
+        if (!InStr(this.customUseDirectives[opt], "@")) {
+            return Format(" {1} ", this.customUseDirectives[opt])
+        }
+
+        parsed := ""
+        loop parse this.customUseDirectives[opt], " " {
+            res := this.parseDirective(A_LoopField, callbackArray)
+            if (res is Func) {
+                callbackArray.Push(res)
+            } else {
+                parsed .= Format(" {1} ", res)
+            }
+        }
+
+        return parsed
+    }
+
+    _handleAlignDirectives(opt) {
+        splittedOpts := StrSplit(opt, ":")
+        alignments := StringExt.replaceThese(splittedOpts[1], ["@align[", "]"])
+        targetCtrl := splittedOpts[2]
+
+        this.svaner[targetCtrl].GetPos(&X, &Y, &Width, &Height)
+
+        parsedPos := ""
+        loop parse alignments, "" {
+            switch StrLower(A_LoopField) {
+                case "x":
+                    parsedPos .= Format(" x{1} ", X)
+                case "y":
+                    parsedPos .= Format(" y{1} ", X)
+                case "w":
+                    parsedPos .= Format(" w{1} ", Width)
+                case "h":
+                    parsedPos .= Format(" h{1} ", Height)
+            }
+        }
+
+        return parsedPos
+    }
+
+    _handleRelativeDirectives(opt) {
+        splittedOpts := StrSplit(opt, ":")
+        relatives := StrLower(StringExt.replaceThese(splittedOpts[1], ["@relative[", "]"]))
+        targetCtrl := splittedOpts[2]
+
+        this.svaner[targetCtrl].GetPos(&X, &Y, &Width, &Height)
+
+        parsedPos := ""
+        for offset in StrSplit(relatives, ";") {
+            switch {
+                case InStr(offset, "x",,1):
+                    parsedPos .= Format(" x{1} ", this._calcRelative(offset, X) + Width)       
+                case InStr(offset, "y",,1):
+                    parsedPos .= Format(" y{1} ", this._calcRelative(offset, Y) + Height)       
+                case InStr(offset, "w",,1):
+                    parsedPos .= Format(" w{1} ", this._calcRelative(offset, Width))       
+                case InStr(offset, "h",,1):
+                    parsedPos .= Format(" h{1} ", this._calcRelative(offset, Height))       
+            }
+        }
+
+        return parsedPos
+    }
+    _calcRelative(offset, xywz) { ; +3, 200
+        operator := match(offset, Map(
+            o => InStr(o, "+"), "+",
+            o => InStr(o, "-"), "-",
+            o => InStr(o, "*"), "*",
+            o => InStr(o, "/"), "/",
+        ))
+
+        offsetNum := Integer(StrSplit(offset, operator)[2])
+        switch operator {
+            case "+":
+                return xywz + offsetNum
+            case "-":
+                return xywz - offsetNum
+            case "*":
+                return xywz * offsetNum
+            case "/":                
+                return xywz / offsetNum
         }
     }
 }
