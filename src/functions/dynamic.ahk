@@ -10,7 +10,7 @@ class Dynamic {
      * ```
      * color := signal("Red")
      * ```
-     * @param {Map<Any, Component>} componentEntries A Map  with option values and related class components
+     * @param {Map<Any, Func | Class>} componentEntries A Map with option values and associated components functions or classes.
      * ```
      * Red(SvanerApp, props) {
      *     r := Component(SvanerApp, A_ThisFuc)
@@ -19,12 +19,13 @@ class Dynamic {
      * 
      * colorEntries := Map("Red", Red, "Blue", Blue)
      * ```
-     * @param {Object} props additional props
+     * @param {Object} [props] Additional props for components.
      * ```
      * props := { style: "w200 h30" }
      * ```
+     * @param {VarRef} [instances] Component instances called by Dynamic.
      */
-    __New(svanerInstance, _signal, componentEntries, props := "", &instances := []) {
+    __New(svanerInstance, _signal, componentEntries, props?, &instances?) {
         TypeChecker.checkType(svanerInstance, Svaner, "Parameter is not a Gui object or Svaner")
         TypeChecker.checkType(_signal, signal, "Parameter is not a signal")
         TypeChecker.checkType(componentEntries, Map, "Parameter is not a Map")
@@ -33,13 +34,16 @@ class Dynamic {
         this.svaner := svanerInstance
         this.signal := _signal
         this.componentEntries := componentEntries
-        this._props := props
-        this.components := []
+        this.props := IsSet(props) ? props : {}
+        this.instanceMap := Map()
         
         ; mount components
-        for val, component in this.componentEntries {
-            instance := this._props ? component.Call(this.svaner, this._props) : component.Call(this.svaner)
-            this.components.Push(instance)
+        for val, component in componentEntries {
+            instance := component(this.svaner, props)
+
+            ; add/combine props
+            instance.defineProps(props)
+            this.instanceMap[val] := instance
 
             instance.render()
             this._handleNestedComponentRender(instance.childComponents)
@@ -50,24 +54,19 @@ class Dynamic {
         effect(this.signal, cur => this._renderDynamic(cur))
 
         ; pass component instances reference
-        instances := this.components
+        instances := this.instanceMap
     }
 
     _renderDynamic(currentValue) {
-        for component in this.components {
-            component.visible(false)
+        for val, instance in this.instanceMap {
+            instance.visible(false)
         }
 
-        componentToShow := 
-            ArrayExt.find(this.components, instance => instance.name == this.componentEntries[currentValue].name) 
-            || ArrayExt.find(this.components, instance => instance.name == currentValue)
-
-
-        componentToShow.visible(true)
+        this.instanceMap[currentValue].visible(true)
     }
 
     _handleNestedComponentRender(childComponents){
-        if (childComponents.Length == 0) {
+        if (!childComponents.Length) {
             return
         }
 
@@ -79,5 +78,3 @@ class Dynamic {
         }
     }
 }
-
-Gui.Prototype.AddDynamic := Dynamic
