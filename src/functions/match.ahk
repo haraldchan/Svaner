@@ -22,20 +22,17 @@
 match(value, dataset, default := false) {
 	res := default
 
-	if (dataset.Base == Object.Prototype) {
-		datasetType := "object"
-	} else if (dataset is Map) {
-		datasetType := "map"
-		,default && dataset.Default := default
+	if (default) {
+		dataset.Default := default
 	}
 
-	if (datasetType == "object") {
-		if dataset.hasOwnProp(value) {
+	if (dataset.base == Object.Prototype) {
+		if (dataset.hasOwnProp(value)) {
 			res := dataset.%value%
 		} else if (!default) {
 			throw UnsetError("Unknown Property", -1, value)
 		}
-	} else if (datasetType == "map") {
+	} else if (dataset is Map) {
 		if (dataset.Has(value)) {
 			res := dataset[value]
 		} else {
