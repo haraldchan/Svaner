@@ -179,7 +179,7 @@ class GuiExt {
 
     /**
      * Returns the row numbers of focused items in a ListView control.
-     * @param {ListView} LV - The ListView control.
+     * @param {Gui.ListView} LV - The ListView control.
      * @returns {Array<number>} Array of focused row numbers.
      */
     static getFocusedRowNumbers(LV) {
@@ -197,37 +197,53 @@ class GuiExt {
 
     /**
      * Registers a function to be call when "Change" event is raised.
+     * @param {Gui.Control} control The target control.
      * @param eventCallback The callback function when event is raised.
+     * @param [delay=1] Delay ms for debounce.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onChange(control, eventCallback, delay := 0) {
+    static onChange(control, eventCallback, delay := 0, addRemove := 1) {
         if (delay) {
             inner() => eventCallback(control, 0)
             delayedCallback() => SetTimer(inner, 0 - delay)
         }
 
-        control.OnEvent("Change", !delay ? eventCallback : (ctrl, info) => delayedCallback())
+        control.OnEvent("Change", !delay ? eventCallback : (ctrl, info) => delayedCallback(), addRemove)
 
-        return this
+        return control
     }
 
     /**
      * Registers a function to be call when "Click" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onClick(control, eventCallback) {
-        control.OnEvent("Click", eventCallback)
+    static onClick(control, eventCallback, addRemove := 1) {
+        control.OnEvent("Click", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "DoubleClick" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onDoubleClick(control, eventCallback) {
+    static onDoubleClick(control, eventCallback, addRemove := 1) {
         control.OnEvent("DoubleClick", eventCallback)
 
         return control
@@ -235,99 +251,144 @@ class GuiExt {
 
     /**
      * Registers a function to be call when "ColClick" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onColClick(control, eventCallback) {
-        control.OnEvent("ColClick", eventCallback)
+    static onColClick(control, eventCallback, addRemove := 1) {
+        control.OnEvent("ColClick", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "ContextMenu" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onContextMenu(control, eventCallback) {
-        control.OnEvent("ContextMenu", eventCallback)
+    static onContextMenu(control, eventCallback, addRemove := 1) {
+        control.OnEvent("ContextMenu", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "Focus" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onFocus(control, eventCallback) {
-        control.OnEvent("Focus", eventCallback)
+    static onFocus(control, eventCallback, addRemove := 1) {
+        control.OnEvent("Focus", eventCallback, addRemove)
 
         return this
     }
 
     /**
      * Registers a function to be call when "LoseFocus" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onBlur(control, eventCallback) {
-        control.OnEvent("LoseFocus", eventCallback)
+    static onBlur(control, eventCallback, addRemove := 1) {
+        control.OnEvent("LoseFocus", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "ItemCheck" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onItemCheck(control, eventCallback) {
-        control.OnEvent("ItemCheck", eventCallback)
+    static onItemCheck(control, eventCallback, addRemove := 1) {
+        control.OnEvent("ItemCheck", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "ItemEdit" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onItemEdit(control, eventCallback) {
-        control.OnEvent("ItemEdit", eventCallback)
+    static onItemEdit(control, eventCallback, addRemove := 1) {
+        control.OnEvent("ItemEdit", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "ItemExpand" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onItemExpand(control, eventCallback) {
-        control.OnEvent("ItemExpand", eventCallback)
+    static onItemExpand(control, eventCallback, addRemove := 1) {
+        control.OnEvent("ItemExpand", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "ItemFocus" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onItemFocus(control, eventCallback) {
-        control.OnEvent("ItemFocus", eventCallback)
+    static onItemFocus(control, eventCallback, addRemove := 1) {
+        control.OnEvent("ItemFocus", eventCallback, addRemove)
 
         return control
     }
 
     /**
      * Registers a function to be call when "ItemSelect" event is raised.
-     * @param eventCallback The callback function when event is raised.
+     * @param {Gui.Control} control
+     * @param {Func} eventCallback The callback function when event is raised.
+     * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+     *                      -  1 = Call the callback after any previously registered callbacks.
+     *                      - -1 = Call the callback before any previously registered callbacks.
+     *                      -  0 = Do not call the callback.
      * @returns {Gui.Control} 
      */
-    static onItemSelect(control, eventCallback) {
-        control.OnEvent("ItemSelect", eventCallback)
+    static onItemSelect(control, eventCallback, addRemove := 1) {
+        control.OnEvent("ItemSelect", eventCallback, addRemove)
 
         return control
     }
