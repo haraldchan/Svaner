@@ -40,7 +40,7 @@ class StackBox {
         this.svaner := svanerInstance
         this.name := options.HasOwnProp("name") ? "$" . options.name : ""
         if (this.name) {
-            this.svaner.components.Push(this)
+            this.svaner.components[this.name] := this
         }
 
         this.fontName := options.HasOwnProp("fontName") ? options.fontName : ""
@@ -142,10 +142,7 @@ class StackBox {
         }
 
         ; bottom
-        bottom := App.AddText(Format("xs10 h20 w{1} y{2}", gbWidth, gbY + gbHeight - 20))
-        bottom.Visible := false
+        bottom := App.AddText(Format("xs10 h20 w{1} y{2} h0", gbWidth, gbY + gbHeight - 20))
         this.ctrls.InsertAt(this.checkbox ? 3 : 2, bottom)
     }
 }
-
-Gui.Prototype.AddStackBox := StackBox
