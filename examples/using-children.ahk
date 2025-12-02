@@ -3,7 +3,7 @@
 
 SvanerApp := Svaner({
     gui: {
-        title: "Just basics"
+        title: "Using Children"
     },
     font: {
         options: "s10",
@@ -23,6 +23,8 @@ UsingChildren(App) {
     c := signal(1)
 
     cComponents := Map(
+        ; bind component specific props by using a func wrapper.
+        ; common props in Dynamic will merge with props here.
         1, (*) => Parent_1(App, { children: (c) => Child_1(App, c.name), red: " cRed" }),
         2, (*) => Parent_2(App, { children: (c) => Child_2(App) }),
         3, Parent_3
@@ -70,7 +72,7 @@ Parent_3(App, props) {
 }
 
 Child_1(App, name) {
-    return App.AddText("w200 h25", "this is the child " . name)
+    return App.AddText("w200 h25", "this is the child of " . name)
 }
 
 Child_2(App) {
