@@ -52,8 +52,8 @@ class GuiExt {
     static getCtrlByName(gui, name) {
         try {
             if (name is String) {
-                if (gui.scs[name]) {
-                    return gui.scs[name]
+                if (gui.svanerCtrls[name]) {
+                    return gui.svanerCtrls[name]
                 }
 
                 if (gui[name]) {
@@ -66,25 +66,18 @@ class GuiExt {
     }
 
     /**
-     * 
-     * @param {Gui} gui 
-     * @param {Func} fn 
-     * @returns {Gui.Control[]}
+     * Returns an Array of controls that fulfills the function.
+     * @param {Gui} gui - The GUI Object
+     * @param {Func} fn  - Filter function.
+     * @returns {Array<Gui.Control>}
+     * @throws {ValueError} 
      */
-    static getCtrlsByMatch(gui, fn, includeArc := false) {
+    static getCtrlsByMatch(gui, fn) {
         ctrls := []
 
         for ctrl in gui {
             if (fn(ctrl)) {
                 ctrls.Push(ctrl)
-            }
-        }
-
-        if (includeArc) {
-            for arName, arControl in gui.scs {
-                if (fn(arControl)) {
-                    ctrls.Push(arControl)
-                }
             }
         }
 
