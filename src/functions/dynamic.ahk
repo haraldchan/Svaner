@@ -29,7 +29,7 @@ class Dynamic {
         TypeChecker.checkType(svanerInstance, Svaner, "Parameter is not a Gui object or Svaner")
         TypeChecker.checkType(_signal, signal, "Parameter is not a signal")
         TypeChecker.checkType(componentEntries, Map, "Parameter is not a Map")
-        TypeChecker.checkType(props, Object.Prototype, "Parameter is not an Object")
+        (IsSet(props) && TypeChecker.checkType(props, Object.Prototype, "Parameter is not an Object"))
 
         this.svaner := svanerInstance
         this.signal := _signal
@@ -39,10 +39,10 @@ class Dynamic {
         
         ; mount components
         for val, component in componentEntries {
-            instance := component(this.svaner, props)
+            instance := component(this.svaner, this.props)
 
             ; add/combine props
-            instance.defineProps(props)
+            instance.defineProps(this.props)
             this.instanceMap[val] := instance
 
             instance.render()
