@@ -29,13 +29,15 @@ class Svaner {
      */
     __New(SvanerConfigs) {
         ; create gui
-        this.gui := Gui(
-            SvanerConfigs.gui.HasOwnProp("options") ? SvanerConfigs.gui.options : "",
-            SvanerConfigs.gui.HasOwnProp("title") ? SvanerConfigs.gui.title : A_ScriptName,
-        )
+        if (SvanerConfigs.HasOwnProp("gui")) {
+            guiOptions := SvanerConfigs.gui.HasOwnProp("options") ? SvanerConfigs.gui.options : ""
+            guiTitle := SvanerConfigs.gui.HasOwnProp("title") ? SvanerConfigs.gui.title : A_ScriptName
+        }
 
-        if (SvanerConfigs.gui.HasOwnProp("events")) {
-            for event, callback in SvanerConfigs.gui.events.OwnProps() {
+        this.gui := Gui(IsSet(guiOptions) ? guiOptions : "", IsSet(guiTitle) ? guiTitle : A_ScriptName)
+
+        if (SvanerConfigs.HasOwnProp("events")) {
+            for event, callback in SvanerConfigs.events.OwnProps() {
                 this.gui.OnEvent(event, callback)
             }
         }
@@ -145,6 +147,12 @@ class Svaner {
      * @param {String} [options] 
      */
     Show(options := "") => this.gui.Show(options)
+
+
+    /**
+     * Hide Gui Window.
+     */
+    Hide() => this.gui.Hide()
 
 
     /**
@@ -1006,9 +1014,14 @@ class Svaner {
         /**
          * Registers a function to be call when "Change" event is raised.
          * @param eventCallback The callback function when event is raised.
+         * @param [delay=1] Delay ms for debounce.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onChange(eventCallback, delay := 0) {
+        onChange(eventCallback, delay := 0, addRemove := 1) {
             callbackToSet := ""
             if (delay) {
                 inner() {
@@ -1026,128 +1039,172 @@ class Svaner {
                 callbackToSet := withParams
             }
 
-            this.ctrl.OnEvent("Change", callbackToSet)
+            this.ctrl.OnEvent("Change", callbackToSet, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "Click" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onClick(eventCallback) {
-            this.ctrl.OnEvent("Click", eventCallback)
+        onClick(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("Click", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "DoubleClick" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onDoubleClick(eventCallback) {
-            this.ctrl.OnEvent("DoubleClick", eventCallback)
+        onDoubleClick(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("DoubleClick", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "ColClick" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onColClick(eventCallback) {
-            this.ctrl.OnEvent("ColClick", eventCallback)
+        onColClick(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("ColClick", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "ContextMenu" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onContextMenu(eventCallback) {
-            this.ctrl.OnEvent("ContextMenu", eventCallback)
+        onContextMenu(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("ContextMenu", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "Focus" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onFocus(eventCallback) {
-            this.ctrl.OnEvent("Focus", eventCallback)
+        onFocus(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("Focus", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "LoseFocus" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onBlur(eventCallback) {
-            this.ctrl.OnEvent("LoseFocus", eventCallback)
+        onBlur(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("LoseFocus", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "ItemCheck" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onItemCheck(eventCallback) {
-            this.ctrl.OnEvent("ItemCheck", eventCallback)
+        onItemCheck(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("ItemCheck", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "ItemEdit" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onItemEdit(eventCallback) {
-            this.ctrl.OnEvent("ItemEdit", eventCallback)
+        onItemEdit(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("ItemEdit", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "ItemExpand" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onItemExpand(eventCallback) {
-            this.ctrl.OnEvent("ItemExpand", eventCallback)
+        onItemExpand(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("ItemExpand", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "ItemFocus" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onItemFocus(eventCallback) {
-            this.ctrl.OnEvent("ItemFocus", eventCallback)
+        onItemFocus(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("ItemFocus", eventCallback, addRemove)
 
             return this
         }
 
         /**
          * Registers a function to be call when "ItemSelect" event is raised.
-         * @param eventCallback The callback function when event is raised.
+         * @param {Func} eventCallback The callback function when event is raised.
+         * @param [addRemove=1] Registers a function or method to be called when the given event is raised.
+         *                      -  1 = Call the callback after any previously registered callbacks.
+         *                      - -1 = Call the callback before any previously registered callbacks.
+         *                      -  0 = Do not call the callback.
          * @returns {Svaner.Control} 
          */
-        onItemSelect(eventCallback) {
-            this.ctrl.OnEvent("ItemSelect", eventCallback)
+        onItemSelect(eventCallback, addRemove := 1) {
+            this.ctrl.OnEvent("ItemSelect", eventCallback, addRemove)
 
             return this
         }
