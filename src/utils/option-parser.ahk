@@ -111,7 +111,7 @@ class OptionParser {
                 case "x":
                     parsedPos .= Format(" x{1} ", X)
                 case "y":
-                    parsedPos .= Format(" y{1} ", X)
+                    parsedPos .= Format(" y{1} ", Y)
                 case "w":
                     parsedPos .= Format(" w{1} ", Width)
                 case "h":
