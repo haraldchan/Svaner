@@ -19,14 +19,20 @@ SvanerApp.Show()
  * @param {Svaner} App 
  */
 Debouncer(App) {
-    content := signal("")
+    content := signal("original text loren opsum")
+    otherContent := signal("")
+    sliderRange := signal(0)
 
     handleValueUpdate(ctrl, _) {
-        content.set(ctrl.Value)
+        otherContent.set(StrUpper(content.value))
     }
 
     return (
-        App.AddEdit("w200 h200 Wrap ReadOnly", "{1}", content),
-        App.AddEdit("vinput w200 r5", "{1}", content).onChange(handleValueUpdate)
+        App.AddEdit("w200 h100 Wrap ReadOnly", "{1}", content),
+        App.AddEdit("w200 h100 Wrap ReadOnly", "{1}", otherContent),
+        App.AddEdit("vinput w200 r5 @bind", "{1}", content).onChange(handleValueUpdate),
+
+        App.AddEdit("@bind w200 h20 Wrap Number", "{1}", sliderRange),
+        App.AddSlider("@bind w200", sliderRange)
     )
 }
