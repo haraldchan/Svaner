@@ -100,14 +100,20 @@ class Svaner {
      */
     __parseOptions(optionString) {
         if (!InStr(optionString, "@")) {
-            return { parsed: optionString, callbacks: "" }
+            return { parsed: optionString, callbacks: "", binding: false }
         }
 
         parsed := ""
         optCallbacks := []
+        binding := false
         splittedOptions := StrSplit(optionString, " ")
 
         for opt in splittedOptions {
+            if (opt == "@bind") {
+                binding := true
+                continue
+            }
+
             res := this.optParser.parseDirective(opt, optCallbacks)
             if (res is Func) {
                 optCallbacks.Push(res)
@@ -116,7 +122,11 @@ class Svaner {
             }
         }
 
-        return { parsed: parsed, callbacks: optCallbacks.Length ? optCallbacks : "" }
+        return { 
+            parsed: parsed, 
+            callbacks: optCallbacks.Length ? optCallbacks : "",
+            binding: binding
+        }
     }
 
     /**
@@ -132,6 +142,23 @@ class Svaner {
         for callback in callbacks {
             callback(control)
         }
+    }
+
+    /**
+     * Apply two way data binding
+     * @param {Svaner.Control} control 
+     * @param {0 | 1} isBinding 
+     */
+    __applySignalDataBinding(control, isBinding) {
+        if (!isBinding) {
+            return 
+        }
+
+        if !(control.depend is signal) {
+            Throw Error("@bind can only apply on single-signal Svaner.Control")
+        }
+
+        control.onChange((ctrl, _) => control.depend.set(ctrl.value))
     }
 
 
@@ -218,6 +245,7 @@ class Svaner {
             ? SvanerComboBox(this.gui, parsedOptions.parsed, listOrDepend, (IsSet(key) ? key : 0))
             : this.gui.AddComboBox(parsedOptions.parsed, listOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
+        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -236,6 +264,7 @@ class Svaner {
             ? SvanerDateTime(this.gui, parsedOptions.parsed, dateFormat, depend)
             : this.gui.AddDateTime(parsedOptions.parsed, dateFormat)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
+        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -255,6 +284,8 @@ class Svaner {
             ? SvanerDropDownList(this.gui, parsedOptions.parsed, listOrDepend)
             : this.gui.AddDDL(parsedOptions.parsed, listOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
+        this.__applySignalDataBinding(control, parsedOptions.binding)
+
         return control
     }
     /**
@@ -282,6 +313,7 @@ class Svaner {
             ? SvanerEdit(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddEdit(parsedOptions.parsed, content)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
+        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -423,6 +455,7 @@ class Svaner {
             ? SvanerMonthCal(this.gui, parsedOptions.parsed, dateOrDepend)
             : this.gui.AddMonthCal(parsedOptions.parsed, IsSet(dateOrDepend) ? dateOrDepend : FormatTime(A_Now, "yyyyMMdd"))
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
+        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -504,6 +537,7 @@ class Svaner {
             ? SvanerSlider(this.gui, parsedOptions.parsed, startingPosOrDepend) 
             : this.gui.AddSlider(parsedOptions.parsed, startingPosOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
+        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
