@@ -3,7 +3,7 @@
 
 SvanerApp := Svaner({
     gui: {
-        title: "Just basics"
+        title: "Debounce"
     },
     font: {
         name: "Tahoma"
@@ -19,20 +19,14 @@ SvanerApp.Show()
  * @param {Svaner} App 
  */
 Debouncer(App) {
-    content := signal("original text loren opsum")
-    otherContent := signal("")
-    sliderRange := signal(0)
+    content := signal("")
 
     handleValueUpdate(ctrl, _) {
-        otherContent.set(StrUpper(content.value))
+        content.set(ctrl.value)
     }
 
     return (
         App.AddEdit("w200 h100 Wrap ReadOnly", "{1}", content),
-        App.AddEdit("w200 h100 Wrap ReadOnly", "{1}", otherContent),
-        App.AddEdit("vinput w200 r5 @bind", "{1}", content).onChange(handleValueUpdate),
-
-        App.AddEdit("@bind w200 h20 Wrap Number", "{1}", sliderRange),
-        App.AddSlider("@bind w200", sliderRange)
+        App.AddEdit("w200 h20 Wrap", "{1}", content).onChange(handleValueUpdate, 300)
     )
 }

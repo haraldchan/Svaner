@@ -3,7 +3,7 @@
 
 SvanerApp := Svaner({
     gui: {
-        title: "Just basics"
+        title: "Types as boundries"
     },
     font: {
         options: "s10",

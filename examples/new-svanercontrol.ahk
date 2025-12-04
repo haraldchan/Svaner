@@ -3,7 +3,7 @@
 
 SvanerApp := Svaner({
     gui: {
-        title: "Just basics"
+        title: "Some controls"
     },
     font: {
         name: "Tahoma"
