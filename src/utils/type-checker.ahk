@@ -79,9 +79,17 @@ class TypeChecker {
                     throw TypeError(Format("{1}; `n`nCurrent Type: {2}", errMsg, Type(depend)), -1, depend)
                 }
             }
-        } else if (!(depend is signal)) {
-            throw TypeError(Format("{1}; `n`nCurrent Type: {2}", errMsg, Type(depend)), -1, depend)
+        } 
+        else if (depend.base == Object.Prototype) {
+            for key, val in depend.OwnProps() {
+                if !(val is signal) {
+                    throw TypeError(Format("{1}; `n`nCurrent Type: {2}", errMsg, Type(depend)), -1, depend)
+                }
+            }
         }
+        else if (!(depend is signal)) {
+            throw TypeError(Format("{1}; `n`nCurrent Type: {2}", errMsg, Type(depend)), -1, depend)
+        } 
 
         return true
     }
