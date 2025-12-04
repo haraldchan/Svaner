@@ -63,8 +63,13 @@ class Svaner {
 
 
     /**
-     * 
-     * @param {String | Func} ctrlSearchString 
+     * Retrieves the GuiControl object associated with the specified condition.
+     * @param {String | Func} ctrlSearchCondition directive/function to search target control.
+     *                                            
+     *                                            prefixes: - "type:{type-name}": returns the first type matched control
+     *                                                      - "typeAll:{type-name}": returns all type matched control in an array.
+     *                                                      - "component:{component-name}": returns a component.
+     * @returns {Gui.Control | Array<Gui.Control>}
      */
     __Item[ctrlSearchCondition] {
         get {
@@ -100,7 +105,7 @@ class Svaner {
      */
     __parseOptions(optionString) {
         if (!InStr(optionString, "@")) {
-            return { parsed: optionString, callbacks: "", binding: false }
+            return { parsed: optionString, callbacks: ""}
         }
 
         parsed := ""
@@ -109,11 +114,6 @@ class Svaner {
         splittedOptions := StrSplit(optionString, " ")
 
         for opt in splittedOptions {
-            if (opt == "@bind") {
-                binding := true
-                continue
-            }
-
             res := this.optParser.parseDirective(opt, optCallbacks)
             if (res is Func) {
                 optCallbacks.Push(res)
@@ -124,8 +124,7 @@ class Svaner {
 
         return { 
             parsed: parsed, 
-            callbacks: optCallbacks.Length ? optCallbacks : "",
-            binding: binding
+            callbacks: optCallbacks.Length ? optCallbacks : ""
         }
     }
 
@@ -202,7 +201,7 @@ class Svaner {
     AddButton(options := "", content := "", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) && depend is signal
+        control := IsSet(depend)
             ? SvanerButton(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddButton(parsedOptions.parsed, content)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
@@ -222,7 +221,7 @@ class Svaner {
     AddCheckBox(options, content := "", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) && depend is signal
+        control := IsSet(depend)
             ? SvanerCheckBox(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddCheckbox(parsedOptions.parsed, content)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
@@ -241,11 +240,10 @@ class Svaner {
     AddComboBox(options, listOrDepend := [], key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := listOrDepend is signal
-            ? SvanerComboBox(this.gui, parsedOptions.parsed, listOrDepend, (IsSet(key) ? key : 0))
-            : this.gui.AddComboBox(parsedOptions.parsed, listOrDepend)
+        control := listOrDepend is Array
+            ? this.gui.AddComboBox(parsedOptions.parsed, listOrDepend)
+            : SvanerComboBox(this.gui, parsedOptions.parsed, listOrDepend, (IsSet(key) ? key : 0))
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
-        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -264,7 +262,6 @@ class Svaner {
             ? SvanerDateTime(this.gui, parsedOptions.parsed, dateFormat, depend)
             : this.gui.AddDateTime(parsedOptions.parsed, dateFormat)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
-        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -280,11 +277,10 @@ class Svaner {
     AddDropDownList(options, listOrDepend, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := listOrDepend is signal
-            ? SvanerDropDownList(this.gui, parsedOptions.parsed, listOrDepend)
-            : this.gui.AddDDL(parsedOptions.parsed, listOrDepend)
+        control := listOrDepend is Array
+            ? this.gui.AddDDL(parsedOptions.parsed, listOrDepend)
+            : SvanerDropDownList(this.gui, parsedOptions.parsed, listOrDepend)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
-        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -309,11 +305,10 @@ class Svaner {
     AddEdit(options := "", content := "", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) && depend is signal
+        control := IsSet(depend)
             ? SvanerEdit(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddEdit(parsedOptions.parsed, content)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
-        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -330,7 +325,7 @@ class Svaner {
     AddGroupBox(options, content := "", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) && depend is signal
+        control := IsSet(depend)
             ? SvanerGroupBox(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddGroupBox(parsedOptions.parsed, content)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
@@ -451,11 +446,10 @@ class Svaner {
     AddMonthCal(options := "", dateOrDepend?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(dateOrDepend) && dateOrDepend is signal
+        control := IsSet(dateOrDepend)
             ? SvanerMonthCal(this.gui, parsedOptions.parsed, dateOrDepend)
             : this.gui.AddMonthCal(parsedOptions.parsed, IsSet(dateOrDepend) ? dateOrDepend : FormatTime(A_Now, "yyyyMMdd"))
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
-        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -471,9 +465,9 @@ class Svaner {
     AddPicture(options, PicFilepathOrDepend, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := PicFilepathOrDepend is signal
-            ? SvanerPicture(this.gui, parsedOptions.parsed, PicFilepathOrDepend, (IsSet(key) ? key : 0))
-            : this.gui.AddPicture(options, PicFilepathOrDepend)
+        control := PicFilepathOrDepend is String
+            ? this.gui.AddPicture(options, PicFilepathOrDepend)
+            : SvanerPicture(this.gui, parsedOptions.parsed, PicFilepathOrDepend, (IsSet(key) ? key : 0))
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
@@ -515,7 +509,7 @@ class Svaner {
     AddRadio(options, content := "", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) && depend is signal
+        control := IsSet(depend)
             ? SvanerRadio(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddRadio(parsedOptions.parsed, content)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
@@ -533,11 +527,10 @@ class Svaner {
     AddSlider(options := "", startingPosOrDepend := 0) {
         parsedOptions := this.__parseOptions(options)
 
-        control := startingPosOrDepend is signal
-            ? SvanerSlider(this.gui, parsedOptions.parsed, startingPosOrDepend) 
-            : this.gui.AddSlider(parsedOptions.parsed, startingPosOrDepend)
+        control := startingPosOrDepend is Number
+            ? this.gui.AddSlider(parsedOptions.parsed, startingPosOrDepend)
+            : SvanerSlider(this.gui, parsedOptions.parsed, startingPosOrDepend) 
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
-        this.__applySignalDataBinding(control, parsedOptions.binding)
 
         return control
     }
@@ -586,7 +579,7 @@ class Svaner {
     AddText(options, content := "", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) && depend is signal
+        control := IsSet(depend)
             ? SvanerText(this.gui, parsedOptions.parsed, content, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddText(parsedOptions.parsed, content)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
@@ -605,7 +598,7 @@ class Svaner {
     AddTreeView(options, depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) && depend is signal
+        control := IsSet(depend)
             ? SvanerTreeView(this.gui, options, (IsSet(depend) ? depend : 0), (IsSet(key) ? key : 0))
             : this.gui.AddTreeView(options)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
@@ -647,39 +640,40 @@ class Svaner {
             this.ctrlType := controlType
             this.options := options ? this._handleOptionsFormatting(options) : ""
             this.content := content ? content : ""
-            this.depend := depend ? this._filterDepends(depend) : 0
+            this.selectStatusDepend := ""
             this.checkStatusDepend := ""
+            this.depend := depend ? this._filterDepends(depend) : 0
             this.key := key
 
             ; ListView options
             if (controlType == "ListView") {
-                this.lvOptions := options.lvOptions
-                this.itemOptions := options.HasOwnProp("itemOptions") ? options.itemOptions : ""
+                this.lvOptions := this.options.lvOptions
+                this.itemOptions := this.options.HasOwnProp("itemOptions") ? this.options.itemOptions : ""
                 this.checkedRows := []
             }
 
             ; TreeView options
             if (controlType == "TreeView") {
-                this.tvOptions := options.tvOptions
-                this.itemOptions := options.HasOwnProp("itemOptions") ? options.itemOptions : ""
+                this.tvOptions := this.options.tvOptions
+                this.itemOptions := this.options.HasOwnProp("itemOptions") ? this.options.itemOptions : ""
             }
 
             ; textString handling
             if (controlType == "ComboBox" || controlType == "DropDownList") {
-                if (depend.value is Array) {
-                    this.optionTexts := depend.value
-                } else if (depend.value is Map) {
-                    this.optionTexts := MapExt.keys(depend.value)
-                    this.optionsValues := MapExt.values(depend.value)
+                if (this.depend.value is Array) {
+                    this.optionTexts := this.depend.value
+                } else if (this.depend.value is Map) {
+                    this.optionTexts := MapExt.keys(this.depend.value)
+                    this.optionsValues := MapExt.values(this.depend.value)
                 }
             } else if (controlType == "ListView") {
-                this.titleKeys := content.keys
-                this.formattedContent := content.HasOwnProp("titles")
-                    ? content.titles
+                this.titleKeys := this.content.keys
+                this.formattedContent := this.content.HasOwnProp("titles")
+                    ? this.content.titles
                     : ArrayExt.map(this.titleKeys, key => (key is Array) ? key[key.Length] : key)
-                this.colWidths := content.HasOwnProp("widths") ? content.widths : ArrayExt.map(this.titleKeys, item => "AutoHdr")
+                this.colWidths := this.content.HasOwnProp("widths") ? this.content.widths : ArrayExt.map(this.titleKeys, item => "AutoHdr")
             } else {
-                this.formattedContent := RegExMatch(content, "\{\d+\}") ? this._handleFormatStr(content, depend, key) : content
+                this.formattedContent := RegExMatch(this.content, "\{\d+\}") ? this._handleFormatStr(this.content, this.depend, this.key) : this.content
             }
 
             ; add control
@@ -695,10 +689,12 @@ class Svaner {
                 this.shadowTree := SvanerTreeView.ShadowTree(this.ctrl)
                 this._handleTreeViewUpdate()
             }
-            else if (controlType == "CheckBox" && this.HasOwnProp("checkValueDepend")) {
+            else if (controlType == "CheckBox") {
                 this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.formattedContent)
-                this.ctrl.Value := this.checkValueDepend.value
-                this.ctrl.OnEvent("Click", (ctrl, *) => this.checkValueDepend.set(ctrl.Value))
+
+                if (this.checkStatusDepend) {
+                    this.ctrl.value := this.checkStatusDepend.value
+                }
             }
             else if (controlType == "ComboBox" || controlType == "DropDownList") {
                 this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.optionTexts)
@@ -772,20 +768,13 @@ class Svaner {
          * @param {signal|Object|Array} depend 
          */
         _filterDepends(depend) {
-            if (depend is Array) {
-                checkValueObject := ArrayExt.find(depend, d => d is Object && d.HasOwnProp("checkValue"))
-                if (checkValueObject != "") {
-                    this.checkValueDepend := (depend.RemoveAt(
-                        ArrayExt.findIndex(depend, d => d is Object && d.HasOwnProp("checkValue"))
-                    )).checkValue
-                    this.checkValueDepend.addSub(this)
-                }
-                return depend
-            } else if (depend is Object && depend.HasOwnProp("checkValue")) {
-                this.checkValueDepend := depend.checkValue
-                this.checkValueDepend.addSub(this)
-                return 0
-            } else {
+            if (depend.base == Object.Prototype) {
+                this.checkStatusDepend := depend.check
+                this.checkStatusDepend.addSub(this)
+
+                return depend.text
+            }
+            else {
                 return depend
             }
         }
@@ -943,7 +932,7 @@ class Svaner {
             }
             else if (this.ctrl is Gui.ListView) {
                 ; update from checkStatusDepend
-                if (this.checkStatusDepend == signal) {
+                if (this.checkStatusDepend) {
                     this.ctrl.Modify(0, this.checkStatusDepend.value == true ? "-Checked" : "+Checked")
                     return
                 }
@@ -957,15 +946,11 @@ class Svaner {
             }
             else if (this.ctrl is Gui.CheckBox) {
                 ; update from checkStatusDepend
-                if (this.checkStatusDepend == signal) {
+                if (this.checkStatusDepend) {
                     this.ctrl.Value := this.CheckStatusDepend.value
-                    return
                 }
                 ; update text label
                 this.ctrl.Text := this._handleFormatStr(this.content, this.depend, this.key)
-                if (this.HasOwnProp("checkValueDepend")) {
-                    this.ctrl.Value := this.checkValueDepend.Value
-                }
                 return
             }
             else if (this.ctrl is Gui.ComboBox || this.ctrl is Gui.DDL) {
@@ -1002,7 +987,7 @@ class Svaner {
          * Sets a depend signal for Svaner Control.
          * @param {Signal} depend 
          */
-        SetDepend(depend) {
+        setDepend(depend) {
             this.depend := this._filterDepends(depend)
             this.update(this.depend)
 
@@ -1012,6 +997,18 @@ class Svaner {
         setKey(newKey) {
             this.key := newKey
             this.update(this.depend)
+
+            return this
+        }
+
+        bind(delay := 0) {
+            try {
+                this.onChange((ctrl, _) => this.depend.set(ctrl.value), delay)
+            }
+            catch {
+                targetDepend := this is SvanerCheckBox ? this.checkStatusDepend : this.depend
+                this.onClick((ctrl, _) => targetDepend.set(ctrl.value))
+            }
 
             return this
         }
