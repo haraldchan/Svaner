@@ -110,7 +110,6 @@ class Svaner {
 
         parsed := ""
         optCallbacks := []
-        binding := false
         splittedOptions := StrSplit(optionString, " ")
 
         for opt in splittedOptions {
@@ -141,23 +140,6 @@ class Svaner {
         for callback in callbacks {
             callback(control)
         }
-    }
-
-    /**
-     * Apply two way data binding
-     * @param {Svaner.Control} control 
-     * @param {0 | 1} isBinding 
-     */
-    __applySignalDataBinding(control, isBinding) {
-        if (!isBinding) {
-            return 
-        }
-
-        if !(control.depend is signal) {
-            Throw Error("@bind can only apply on single-signal Svaner.Control")
-        }
-
-        control.onChange((ctrl, _) => control.depend.set(ctrl.value))
     }
 
 
