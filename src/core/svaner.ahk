@@ -754,7 +754,7 @@ class Svaner {
                 this.checkStatusDepend := depend.check
                 this.checkStatusDepend.addSub(this)
 
-                return depend.text
+                return depend.HasOwnProp("text") ? depend.text : 0
             }
             else {
                 return depend
