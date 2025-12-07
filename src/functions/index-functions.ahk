@@ -7,14 +7,14 @@
 ; functions
 #Include "./shareCheckStatus.ahk"
 #Include "./useListPlaceholder.ahk"
-#Include "./useImages.ahk"
-#Include "./useProps.ahk"
-#Include "./useStore.ahk"
 #Include "./match.ahk"
 #Include "./unpack.ahk"
 #Include "./pipe.ahk"
 
 ; classes
+#Include "./useStore.ahk"
+#Include "./useProps.ahk"
+#Include "./useImages.ahk"
 #Include "./orderedmap.ahk"
 #Include "./struct.ahk"
 #Include "./general-tree.ahk"
