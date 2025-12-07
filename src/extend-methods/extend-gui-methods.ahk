@@ -164,16 +164,19 @@ class GuiExt {
      */
     static getCheckedRowNumbers(LV) {
         checkedRowNumbers := []
-        loop LV.GetCount() {
-            curRow := LV.GetNext(A_Index - 1, "Checked")
-            try {
-                if (curRow == prevRow || curRow == 0) {
-                    Continue
-                }
+        rowNumber := 1
+        LVM_GETITEMSTATE := 0x102C
+        LVIS_STATEIMAGEMASK := 0xF000
+
+        loop {
+            itemState := SendMessage(LVM_GETITEMSTATE, rowNumber - 1, LVIS_STATEIMAGEMASK, LV)
+            isChecked := (itemState >> 12) - 1
+            if (isChecked) {
+                checkedRowNumbers.Push(rowNumber)
             }
-            checkedRowNumbers.Push(curRow)
-            prevRow := curRow
-        }
+            rowNumber++
+        } until (A_Index == LV.GetCount())
+        
         return checkedRowNumbers
     }
 
