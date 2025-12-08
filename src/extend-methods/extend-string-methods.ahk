@@ -7,10 +7,6 @@ class StringExt {
      * Patches the String prototype with extended methods if enabled in ARConfig.
      */
     static patch() {
-        if (!ARConfig.useExtendMethods) {
-            return
-        }
-
         for method, enabled in ARConfig.enableExtendMethods.string.OwnProps() {
             if (enabled) {
                 String.Prototype.%method% := ObjBindMethod(this, method)
