@@ -4,8 +4,22 @@
 #Include "./extend-gui-methods.ahk"
 #Include "./extend-map-methods.ahk"
 
-ArrayExt.patch()
-StringExt.patch()
-NumberExt.patch()
-GuiExt.patch()
-MapExt.patch()
+patchMethods() {
+    if (!ARConfig.useExtendMethods) {
+        return
+    }
+
+    ArrayExt.patch()
+    StringExt.patch()
+    NumberExt.patch()
+    GuiExt.patch()
+    MapExt.patch()
+    
+    if (ARConfig.enableExtendMethods.any.HasOwnProp("satisfies")) {
+        if (ARConfig.enableExtendMethods.any.satisfies) {
+            Struct.patch()
+        }
+    }
+}
+
+patchMethods()
