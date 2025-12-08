@@ -16,12 +16,20 @@ class StackBox {
      *     groupbox: { 
      *         title: "This is a StackBox",
      *         options: "Section w250 r9",
+     *         events: {
+     *             click: (*) => ...,
+     *             ...
+     *         }
      *     },
      * 
      *     ; (optional) Use a CheckBox as title
      *     checkbox: {
      *         title: "StackBox with CheckBox title",
      *         options: "Checked w250"
+     *         events: {
+     *             click: (*) => ...,
+     *             ...
+     *         }
      *     }, 
      * }
      * ```
@@ -51,6 +59,8 @@ class StackBox {
         ; GroupBox option
         this.gbOptions := this.svaner.__parseOptions(options.groupbox.options)
         this.gbTitle := options.groupbox.HasOwnProp("title") && !options.HasOwnProp("checkbox") ? options.groupbox.title : ""
+        this.gbEvents := options.groupbox.HasOwnProp("events") ? options.groupbox.events : ""
+
         ; CheckBox option
         this.checkbox := options.HasOwnProp("checkbox") ? options.checkbox : ""
         if (this.checkbox) {
@@ -60,6 +70,8 @@ class StackBox {
                 this.cbOptions := this.svaner.__parseOptions(this.checkbox.options)
 
             }
+
+            this.cbEvents := options.checkbox.HasOwnProp("events") ? options.checkbox.events : ""
         }
 
         ; mount controls
@@ -105,6 +117,20 @@ class StackBox {
         }
     }
 
+    _addEvents(gb, cb) {
+        if (this.gbEvents) {
+            for eventName, callback in this.gbEvents.OwnProps() {
+                gb.OnEvent(eventName, callback)
+            }
+        }
+
+        if (this.checkbox && this.cbEvents) {
+            for eventName, callback in this.cbEvents.OwnProps() {
+                cb.OnEvent(eventName, callback)
+            }
+        }
+    }
+
     setEnable(isEnabled) {
         for control in this.ctrls {
             if (A_Index < 3) {
@@ -132,6 +158,9 @@ class StackBox {
             this.cbCtrl.OnEvent("Click", (ctrl, _) => this.setEnable(ctrl.Value))
             this.ctrls.Push(this.cbCtrl)
         }
+
+        ; add events
+        this._addEvents(this.gbCtrl, this.HasOwnProp("cbCtrl") ? this.cbCtrl : 0)
 
         ; mount controls
         this._saveCtrls(this.ctrls, this.renderCallback())
