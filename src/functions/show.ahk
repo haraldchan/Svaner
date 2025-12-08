@@ -2,21 +2,21 @@ class Show {
     /**
      * Creates a block of controls which displays conditionally
      * @param {()=>Gui.Control | ()=>Svaner.Control | ()=>Array<Gui.Control|Svaner.Control>} renderCallBack 
-     * @param {signal} _signal 
-     * @param {()=>void} conditionFn 
+     * @param {signal} depend 
+     * @param {(signal.value)=>(true | false)} conditionFn 
      */
-    __New(renderCallBack, _signal, conditionFn) {
+    __New(renderCallBack, depend, conditionFn) {
         this.renderCallBack := renderCallBack
-        this._signal := _signal
+        this.depend := depend
         this.conditionFn := conditionFn
         this.ctrls := []
 
-        effect(this._signal, cur => this.toggleShowHide(conditionFn(cur)))
+        effect(this.depend, cur => this.toggleShowHide(conditionFn(cur)))
 
         ; mount & save controls
         ctrls := renderCallBack()
         this.saveCtrls(this.ctrls, ctrls is Array ? ctrls : [ctrls])
-        this.toggleShowHide(conditionFn(this._signal.value))
+        this.toggleShowHide(conditionFn(this.depend.value))
     }
 
     saveCtrls(savedCtrls, renderedCtrls) {
@@ -49,6 +49,11 @@ class Show {
                 if (control.childComponents.Length > 0) {
                     this.saveCtrls(savedCtrls, control.childComponents)
                 }
+            }
+
+            ; stackbox
+            if (control is StackBox) {
+                this.saveCtrls(savedCtrls, control.ctrls)
             }
         }
     }
