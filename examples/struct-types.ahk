@@ -22,12 +22,12 @@ SvanerApp.Show()
 StructTypes(App) {
     Staff := Struct({
         name: String,
-        pos:  ["attendeng", "supervisor", "manager"],
+        pos:  ["attendant", "supervisor", "manager"],
         age:  Integer
     })
 
     staffList := signal([
-        { name: "harald", pos: "attendeng", age: 22 },
+        { name: "harald", pos: "attendant", age: 22 },
         { name: "amy", pos: "supervisor", age: 25 },
         { name: "leon", pos: "manager", age: 36 }
     ], { name: "staffList" }).as([Staff])
@@ -54,6 +54,8 @@ StructTypes(App) {
         }
     }
 
+    isShow := signal(false)
+
     return (
         App.AddListView(
             { lvOptions: "vstaff-list w250 r6 @lv:label-tip" },
@@ -63,7 +65,7 @@ StructTypes(App) {
             },
             staffList
         ),
-        StackBox(App,
+        Show(() => StackBox(App,
             {
                 name: "add-new-staff",
                 fontOptions: "bold",
@@ -81,8 +83,7 @@ StructTypes(App) {
                 App.AddEdit("vnew-age x+10 w165", ""),
                 App.AddButton("xs155 yp+30 w80 h25", "Add").onClick(handleAddNewStaff)
             ]
-        )
+        ), isShow, s => s == true),
+        App.AddCheckBox("w100 h20", "toggle show", { text: isShow, check: isShow }).bind()
     )
 }
-
-; DevToolsUI()
