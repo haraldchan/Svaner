@@ -409,7 +409,7 @@ class Svaner {
                 columnDetailsOrList, depend, (IsSet(key) ? key : 0))
             : this.gui.AddListView(parsedOptions.parsed, columnDetailsOrList)
 
-        if (parsedLvOptions.callbacks || parsedItemOptions.callbacks) {
+        if (control is SvanerListView && (parsedLvOptions.callbacks || parsedItemOptions.callbacks)) {
             callbacks := ArrayExt.append(parsedLvOptions.callbacks, parsedItemOptions.callbacks)
         }
 
@@ -448,7 +448,7 @@ class Svaner {
         parsedOptions := this.__parseOptions(options)
 
         control := PicFilepathOrDepend is String
-            ? this.gui.AddPicture(options, PicFilepathOrDepend)
+            ? this.gui.AddPicture(parsedOptions.parsed, PicFilepathOrDepend)
             : SvanerPicture(this.gui, parsedOptions.parsed, PicFilepathOrDepend, (IsSet(key) ? key : 0))
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
