@@ -10,11 +10,11 @@ class computed extends signal {
      * @param {Func} mutation computation function expression.
      * @return {computed}
      */
-    __New(_signal, mutation, options := { name: "" }) {
-        TypeChecker.checkType(_signal, [signal, computed, Array], "First parameter is not a signal.")
+    __New(depend, mutation, options := { name: "" }) {
+        TypeChecker.checkType(depend, [signal, computed, Array], "First parameter is not a signal.")
         TypeChecker.checkType(mutation, Func, "Second parameter is not a Function.")
 
-        this.signal := _signal
+        this.signal := depend
         this.mutation := mutation
         this.prevValue := 0
 

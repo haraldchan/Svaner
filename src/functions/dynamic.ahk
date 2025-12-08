@@ -6,7 +6,7 @@ class Dynamic {
      * ```
      * Dynamic(SvanerApp, color, colorEntries, props)
      * ```
-     * @param {signal} _signal Depend signal.
+     * @param {signal} depend Depend signal.
      * ```
      * color := signal("Red")
      * ```
@@ -25,14 +25,14 @@ class Dynamic {
      * ```
      * @param {VarRef} [instances] Component instances called by Dynamic.
      */
-    __New(svanerInstance, _signal, componentEntries, props?, &instances?) {
+    __New(svanerInstance, depend, componentEntries, props?, &instances?) {
         TypeChecker.checkType(svanerInstance, Svaner, "Parameter is not a Gui object or Svaner")
-        TypeChecker.checkType(_signal, signal, "Parameter is not a signal")
+        TypeChecker.checkType(depend, signal, "Parameter is not a signal")
         TypeChecker.checkType(componentEntries, Map, "Parameter is not a Map")
         (IsSet(props) && TypeChecker.checkType(props, Object.Prototype, "Parameter is not an Object"))
 
         this.svaner := svanerInstance
-        this.signal := _signal
+        this.signal := depend
         this.componentEntries := componentEntries
         this.props := IsSet(props) ? props : {}
         this.instanceMap := Map()

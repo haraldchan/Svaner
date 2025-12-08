@@ -13,7 +13,7 @@ class IndexList {
      * ```
      * () => [ oGui.AddText("...", "staff info"), ... ]
      * ```
-     * @param {signal} _signal A signal with the value type of Map/Object.
+     * @param {signal} depend A signal with the value type of Map/Object.
      * ```
      * staff := signal([
      *   { name: "Amy", title: "Manager"},
@@ -26,13 +26,13 @@ class IndexList {
      * ```
      * @returns {IndexList}
      */
-    __New(renderCallback, _signal, keys := []) {
+    __New(renderCallback, depend, keys := []) {
         TypeChecker.checkType(renderCallback, Func, "Parameter #2 is not a function.")
-        TypeChecker.checkType(_signal, [signal, computed], "Parameter #1 is not a signal/computed.")
+        TypeChecker.checkType(depend, [signal, computed], "Parameter #1 is not a signal/computed.")
         TypeChecker.checkType(keys, Array, "Parameter #2 is not an Array.")
 
         this.renderCallBack := renderCallback
-        this.signal := _signal
+        this.signal := depend
         this.keys := keys
         this.ctrlGroups := []
         this.templates := []
