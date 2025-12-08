@@ -35,6 +35,8 @@ SCS(App) {
         { name: "alex",   pos: "supervisor", age: 18 },
     ], { name: "staffList" }).as([Staff])
 
+    ; isSelectAll := signal(false)
+
     handleAddNewStaff(*) {
         /** @type {Array<Gui.Control>} */
         formCtrls := App[ctrl => ctrl.Name.startsWith("new-")]
@@ -62,11 +64,16 @@ SCS(App) {
     }
 
     onMount() {
-        shareCheckStatus(App["select-all"], App["staff-list"])
+        shareCheckStatus(
+            App["select-all"], 
+            App["staff-list"],
+            ; isSelectAll
+        )
     }
 
     return (
         App.AddCheckBox("vselect-all w250", "Select all"),
+        ; App.AddCheckBox("vselect-all w250", "Select all", { check: isSelectAll }),
         App.AddListView(
             { 
                 lvOptions: "vstaff-list w250 r10 @lv:label-tip Checked",
