@@ -1,7 +1,6 @@
 /**
  * Creates a function that pipes a value through a sequence of functions.
- * @template T,U
- * @param {Func[]} fns - A list of functions to apply from left to right.
+ * @param {Array<Func>} fns - A list of functions to apply from left to right.
  * @returns {(input) => Any} A new function that takes an input and passes it through all functions in order.
  *
  * ```
