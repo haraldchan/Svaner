@@ -30,7 +30,6 @@ class unpack {
     _refs(rawRefs) {
         if (rawRefs is Array) {
             return pipe(
-                ; x => ArrayExt.flat(x),
                 x => ArrayExt.map(x, (&var) => value => var := value)
             )(rawRefs)
 
@@ -54,9 +53,7 @@ class unpack {
             return
         }
 
-        if (source is Array) {
-            ; source := ArrayExt.flat(source)
-            
+        if (source is Array) {            
             for setter in setters {
                 if (A_Index > source.Length) {
                     throw IndexError("Index out of range", -1, A_Index)
