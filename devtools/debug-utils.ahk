@@ -27,7 +27,7 @@ class DebuggerList {
 			debugger: debugger
 		}
 
-		this.debuggers.set([this.debuggers.value*].append(listed))
+		this.debuggers.set(ArrayExt.append([this.debuggers.value*], listed))
 	}
 
 	/**
