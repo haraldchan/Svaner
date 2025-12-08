@@ -5,16 +5,16 @@
 #Include "./stackbox.ahk"
 
 ; functions
-#Include "./shareCheckStatus.ahk"
-#Include "./useListPlaceholder.ahk"
+#Include "./share-check-status.ahk"
+#Include "./use-list-placeholder.ahk"
 #Include "./match.ahk"
 #Include "./unpack.ahk"
 #Include "./pipe.ahk"
 
 ; classes
-#Include "./useStore.ahk"
-#Include "./useProps.ahk"
-#Include "./useImages.ahk"
+#Include "./use-store.ahk"
+#Include "./use-props.ahk"
+#Include "./use-images.ahk"
 #Include "./orderedmap.ahk"
 #Include "./struct.ahk"
 #Include "./general-tree.ahk"
