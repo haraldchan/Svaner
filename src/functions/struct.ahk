@@ -35,6 +35,60 @@ class Struct {
         return Struct.StructInstance(data, this.typeMap)
     }
 
+    /**
+     * Validates if a value satisfies Struct.
+     * @param {Any} value 
+     * @returns {Any | false}
+     */
+    validate(value) {
+        return Struct.satisfies(value, this)
+    }
+
+    static patch() => Any.Prototype.satisfies := ObjBindMethod(Struct, "satisfies")
+    /**
+     * Validates if a value satisfies datatype.
+     * @param {Any} value 
+     * @param {Any} datatype 
+     * @returns {Any | false} 
+     */
+    static satisfies(value, datatype) {
+        if (datatype is Array) {
+            switch {
+                case (datatype.Length == 1 && datatype[1] is Struct):
+                    for item in value {
+                        if (!datatype[1].validate(item)) {
+                            return false
+                        }
+                    }
+                    return value
+                case (datatype.Length == 1):  
+                    for item in value {
+                        if !(item is datatype) {
+                            return false
+                        }
+                    }
+                    return value
+                default:
+                    if (!ArrayExt.find(datatype, t => t.base == value.base && t == value)) {
+                        return false
+                    }
+                    return value
+            }
+        } 
+        else if (datatype is Struct) {
+            try {
+                datatype.new(value)
+                return value
+            }
+            catch {
+                return false
+            }
+        }
+        else {
+            return value is datatype ? value : false
+        }
+    }
+
     class StructInstance {
         __New(data, typeMap) {
             this.data := data
