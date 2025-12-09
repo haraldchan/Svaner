@@ -112,7 +112,7 @@ class StackBox {
 
             ; Dynamic
             if (control is Dynamic) {
-                this._saveCtrls(savedCtrls, control.components)
+                this._saveCtrls(savedCtrls, MapExt.values(control.instanceMap))
             }
         }
     }
