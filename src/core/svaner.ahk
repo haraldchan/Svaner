@@ -162,6 +162,12 @@ class Svaner {
      */
     Hide() => this.gui.Hide()
 
+    /**
+     * Collect values from named controls and combine them into an object, optionally hiding the window.
+     * @param {true | false} hide 
+     */
+    Submit(hide := true) => this.gui.Submit(hide)
+
 
     /**
      * Define custom directives.
