@@ -171,7 +171,7 @@ class StackBox {
         }
 
         ; bottom
-        bottom := App.AddText(Format("xs10 h20 w{1} y{2} h0", gbWidth, gbY + gbHeight - 20))
+        bottom := App.AddText(Format("xs10 h20 w{1} y{2} h0 border", gbWidth, gbY + gbHeight))
         this.ctrls.InsertAt(this.checkbox ? 3 : 2, bottom)
     }
 }
