@@ -5,10 +5,10 @@
  * @version 0.1.8-20251208
  ***********************************************************************/
 
-#Include "./ar.config.ahk"
-#Include "./src/utils/index-utils.ahk"
-#Include "./src/core/index-core.ahk"
-#Include "./src/extend-methods/index-extend-methods.ahk"
-#Include "./src/extend-classes/index-extend-classes.ahk"
-#Include "./src/functions/index-functions.ahk"
-#Include "./devtools/index-devtools.ahk"
+#Include ar.config.ahk
+#Include src\utils\index-utils.ahk
+#Include src\core\index-core.ahk
+#Include src\extend-methods\index-extend-methods.ahk
+#Include src\extend-classes\index-extend-classes.ahk
+#Include src\functions\index-functions.ahk
+#Include devtools\index-devtools.ahk
