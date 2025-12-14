@@ -15,8 +15,8 @@
  * 
  * Supports deep nesting and type-safe value mapping from the source object or array.
  * 
- * @param {Array<VarRef>|Object<string, VarRef>} outputVars - An array or object containing VarRefs to receive values.
- * @param {Array|Object|useStore} source - An array, Map, or plain object whose values are unpack into outputVars.
+ * @param {Array | Object | useStore} source - An array, Map, or plain object whose values are unpack into outputVars.
+ * @param {Array<VarRef> | Object<string, VarRef>} outputVars - An array or object containing VarRefs to receive values.
  * @throws {ValueError} If a key or index is missing in the source.
  */
 unpack(source, outputVars) {
