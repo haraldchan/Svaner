@@ -51,8 +51,8 @@ class StackBox {
             this.svaner.components[this.name] := this
         }
 
-        this.fontName := options.HasOwnProp("font") && options.font.HasOwnProp("fontName") ? options.fontName : ""
-        this.fontOptions := options.HasOwnProp("font") && options.font.HasOwnProp("fontOptions") ? options.fontOptions : ""        
+        this.fontName := options.HasOwnProp("font") && options.font.HasOwnProp("name") ? options.font.name : ""
+        this.fontOptions := options.HasOwnProp("font") && options.font.HasOwnProp("options") ? options.font.options : ""        
 
         this.renderCallback := (*) => renderCallback()
         this.ctrls := []
