@@ -27,7 +27,18 @@ class Svaner {
      * @param {SvanerConfigs} SvanerConfigs 
      * @returns {Svaner}
      */
-    __New(SvanerConfigs) {
+    __New(SvanerConfigs := {
+        gui: {
+            options: "",
+            title: A_ScriptName
+        },
+        font: {
+            name: "Tahoma"
+        },
+        events: {
+            close: (thisGui) => thisGui.Destroy()
+        }
+    }) {
         ; create gui
         if (SvanerConfigs.HasOwnProp("gui")) {
             guiOptions := SvanerConfigs.gui.HasOwnProp("options") ? SvanerConfigs.gui.options : ""
