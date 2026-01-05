@@ -3,6 +3,7 @@
  * @property { { options?: String, title?: String } } gui
  * @property { { options?: String, name?: String } } font
  * @property { { [key: String]: ()=>void } } events
+ * @property { { border?: false } } devOpt
  */
 
 class Svaner {
@@ -37,6 +38,9 @@ class Svaner {
         },
         events: {
             close: (thisGui) => thisGui.Destroy()
+        },
+        devOpt: {
+            border: false
         }
     }) {
         ; create gui
@@ -63,6 +67,10 @@ class Svaner {
                 SvanerConfigs.font.HasOwnProp("options") ? SvanerConfigs.font.options : "",
                 SvanerConfigs.font.HasOwnProp("name") ? SvanerConfigs.font.name : ""
             )
+        }
+
+        if (SvanerConfigs.HasOwnProp("devOpt")) {
+            this.devOpt := SvanerConfigs.devOpt
         }
 
         ; components
@@ -115,7 +123,7 @@ class Svaner {
      */
     __parseOptions(optionString) {
         if (!InStr(optionString, "@")) {
-            return { parsed: optionString, callbacks: ""}
+            return { parsed: this.HasOwnProp("devOpt") ? optionString . " Border " : optionString, callbacks: "" }
         }
 
         parsed := ""
@@ -132,7 +140,7 @@ class Svaner {
         }
 
         return { 
-            parsed: parsed, 
+            parsed: this.HasOwnProp("devOpt") ? parsed . " Border " : parsed, 
             callbacks: optCallbacks.Length ? optCallbacks : ""
         }
     }
