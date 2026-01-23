@@ -22,11 +22,11 @@ SvanerApp.Show()
 CustomDirectives(App) {
     App.defineDirectives(
         "@use:red-text",    "cRed",
-        "@func:blue-text",  ctrl => ctrl.SetFont("cBlue bold s12"),
-        "@func:greenify",   handleGreenify,
+        "@use:blue-text",  ctrl => ctrl.SetFont("cBlue bold s12"),
+        "@use:greenify",   handleGreenify,
         "@use:sunk",        "0x1000",
         "@use:combination", "@align[wh]:first-text @text:align-center",
-        "@use:nested-comb", "@use:combination @use:sunk @func:greenify"
+        "@use:nested-comb", "@use:combination @use:sunk @use:greenify"
     )
 
     /**
@@ -38,8 +38,8 @@ CustomDirectives(App) {
 
     return (
         App.AddText("vfirst-text w200 h30 @text:align-center @use:red-text", "Using red-text"),
-        App.AddText("@use:combination @func:blue-text", "Using callback blue-text"),
-        App.AddText("@use:combination @func:greenify", "Click to green!"),
+        App.AddText("@use:combination @use:blue-text", "Using callback blue-text"),
+        App.AddText("@use:combination @use:greenify", "Click to green!"),
         App.AddText("@use:nested-comb", "Directive Combination"),
         0
     )
