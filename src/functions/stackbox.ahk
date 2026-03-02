@@ -1,4 +1,4 @@
-class StackBox {
+class StackBox extends Component{
     /**
      * Creates a StackBox component for containing child controls.
      * @param {Svaner} svanerInstance The Svaner instance to which the StackBox belongs
@@ -48,7 +48,7 @@ class StackBox {
      */
     __New(svanerInstance, options, renderCallback) {
         this.svaner := svanerInstance
-        this.name := options.HasOwnProp("name") ? "$" . options.name : ""
+        this.name := options.HasOwnProp("name") ? options.name : ""
         if (this.name) {
             this.svaner.components[this.name] := this
         }
@@ -58,6 +58,7 @@ class StackBox {
 
         this.renderCallback := (*) => renderCallback()
         this.ctrls := []
+        this.childComponents := []
 
         ; GroupBox option
         this.gbOptions := this.svaner.__parseOptions(options.groupbox.options)
@@ -78,6 +79,7 @@ class StackBox {
 
         ; mount controls
         this._renderStackBox(this.svaner)
+        this.render := (*) => []
     }
 
     _saveCtrls(savedCtrls, renderedCtrls) {
