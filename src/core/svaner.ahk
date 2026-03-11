@@ -689,6 +689,7 @@ class Svaner {
                 }
             }
             else if (controlType == "ListView") {
+                this.isFocusOnUpdate := false
                 this.titleKeys := this.content.keys
                 this.formattedContent := this.content.HasOwnProp("titles")
                     ? this.content.titles
@@ -707,10 +708,10 @@ class Svaner {
                     this.checkedRows := []
 
                     this.ctrl := this.GuiObject.Add(this.ctrlType, this.lvOptions, this.formattedContent)
-                    this._handleListViewUpdate()
                     for width in this.colWidths {
                         this.ctrl.ModifyCol(A_Index, width)
                     }
+                    this._handleListViewUpdate()
                 case controlType == "TreeView":
                     this.tvOptions := this.options.tvOptions
                     this.itemOptions := this.options.HasOwnProp("itemOptions") ? this.options.itemOptions : ""
@@ -918,7 +919,9 @@ class Svaner {
             }
 
             this.ctrl.Modify(1, "Select")
-            this.ctrl.Focus()
+            if (this.isFocusOnUpdate) {
+                this.ctrl.Focus()
+            }
         }
         _listview_getExactMatch(keys, item, index) {
             if !(item is Map || item.base == Object.Prototype) {
