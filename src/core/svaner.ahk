@@ -22,6 +22,9 @@ class Svaner {
      *      events: {
      *          close: (thisGui) => thisGui.Destroy(),
      *          ; ...
+     *      },
+     *      devOpt: {
+     *          border: false
      *      }
      * }
      * ```
@@ -51,6 +54,7 @@ class Svaner {
 
         this.gui := Gui(IsSet(guiOptions) ? guiOptions : "", IsSet(guiTitle) ? guiTitle : A_ScriptName)
 
+        this.events := []
         if (SvanerConfigs.HasOwnProp("events")) {
             for event, callback in SvanerConfigs.events.OwnProps() {
                 this.gui.OnEvent(event, callback)
@@ -62,6 +66,7 @@ class Svaner {
         this.gui.svanerCtrls.Default := ""
 
         ; set font
+        this.font := { options: "", name: "" }
         if (SvanerConfigs.HasOwnProp("font")) {
             this.gui.SetFont(
                 SvanerConfigs.font.HasOwnProp("options") ? SvanerConfigs.font.options : "",
@@ -69,6 +74,7 @@ class Svaner {
             )
         }
 
+        this.devOpt := {}
         if (SvanerConfigs.HasOwnProp("devOpt")) {
             this.devOpt := SvanerConfigs.devOpt
         }
@@ -123,7 +129,7 @@ class Svaner {
      */
     __parseOptions(optionString) {
         if (!InStr(optionString, "@")) {
-            return { parsed: this.HasOwnProp("devOpt") ? optionString . " Border " : optionString, callbacks: "" }
+            return { parsed: (this.devOpt.HasOwnProp("border") && this.devOpt.border == true) ? optionString . " Border " : optionString, callbacks: "" }
         }
 
         parsed := ""
@@ -140,7 +146,7 @@ class Svaner {
         }
 
         return { 
-            parsed: this.HasOwnProp("devOpt") ? parsed . " Border " : parsed, 
+            parsed: (this.devOpt.HasOwnProp("border") && this.devOpt.border == true) ? parsed . " Border " : parsed, 
             callbacks: optCallbacks.Length ? optCallbacks : ""
         }
     }
