@@ -570,8 +570,8 @@ class Svaner {
 
     /**
      * Add StatusBar control to Gui
-     * @param {String} options 
-     * @param {String} startingText 
+     * @param {String} options Options/Directives apply to the control.
+     * @param {String} startingText Initial text.
      * @returns {Gui.StatusBar} 
      */
     AddStatusBar(options := "", startingText := "") {
@@ -586,9 +586,17 @@ class Svaner {
 
     /**
      * Add Tab3 control to Gui
-     * @param {String} options 
-     * @param {Array<String> | Array<Map<String | Integer, ()=>void>>} pages 
-     * @returns {Gui.Tab} 
+     * @param {String} options Options/Directives apply to the control.
+     * @param {Array<String> | Map<String | Integer, ()=>void>>} pages Page titles or pages with components.
+     * ```
+     * tab3 := oGui.AddTab3("...", ["first-tab", "second-tab", ...])
+     * 
+     * oGui.AddTab3("...", Map(
+     *     "first-tab",  () => SomeComonentFunc(),
+     *     "second-tab", () => SomeComonentFunc2(),
+     * ))
+     * ```
+     * @returns {Gui.Tab}
      */
     AddTab3(options := "", pages := []) {
         parsedOptions := this.__parseOptions(options)
