@@ -284,11 +284,11 @@ class Svaner {
      * @param {signal} [depend] Subsribed signal.
      * @returns {SvanerDateTime | Gui.DateTime} 
      */
-    AddDateTime(options, dateFormat := "yyyy/MM/dd", depend?) {
+    AddDateTime(options, dateFormat := "yyyy/MM/dd", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
         control := IsSet(depend) 
-            ? SvanerDateTime(this.gui, parsedOptions.parsed, dateFormat, depend)
+            ? SvanerDateTime(this.gui, parsedOptions.parsed, dateFormat, depend, (IsSet(key) ? key : 0))
             : this.gui.AddDateTime(parsedOptions.parsed, dateFormat)
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
@@ -554,14 +554,15 @@ class Svaner {
      * Add a Radio/SvanerRadio control to Gui
      * @param {String} [options] Options/Directives apply to the control.
      * @param {Integer | signal} [startingPosOrDepend] Starting position of the slider/ Subsribed signal associates with slider value.
+     * @param {String | Array | Object} [key] the keys or index of the signal's value.
      * @returns {SvanerSlider | Gui.Slider} 
      */
-    AddSlider(options := "", startingPosOrDepend := 0) {
+    AddSlider(options := "", startingPosOrDepend := 0, key?) {
         parsedOptions := this.__parseOptions(options)
 
         control := startingPosOrDepend is Number
             ? this.gui.AddSlider(parsedOptions.parsed, startingPosOrDepend)
-            : SvanerSlider(this.gui, parsedOptions.parsed, startingPosOrDepend) 
+            : SvanerSlider(this.gui, parsedOptions.parsed, startingPosOrDepend, (IsSet(key) ? key : 0))
         this.__applyCallbackDirectives(control, parsedOptions.callbacks)
 
         return control
@@ -752,7 +753,15 @@ class Svaner {
                     this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.depend.value)
                 case controlType == "DateTime":
                     this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.content)
-                    this.update(this.depend)                  
+                    this.update(this.depend)
+                case controlType == "Slider":
+                    if (this.key is Func) {
+                        f := this.key
+                        this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, f(this.depend.value))
+                    }
+                    else {
+                        this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this._traverse_get(this.key, this.depend.value))
+                    }
                 default:
                     this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.formattedContent)
             }
@@ -883,14 +892,47 @@ class Svaner {
             if (key.base == Object.Prototype) {
                 index := key.HasOwnProp("index") ? key.index : A_Index
 
-                for k in key.keys {
-                    vals.Push(k is Func ? k(depend.value[index]) : (depend.value[index] is Map ? depend.value[index][k] : depend.value[index].%k%))
+                for k in key.keys {                    
+                    val := ""
+                    switch {
+                        case (k is Func):
+                            val := k(depend.value[index])
+                        case (depend.value[index] is Map):
+                            val := depend.value[index][k]
+                        case (k is Array):
+                            val := this._traverse_get(k, depend.value[index], 1)
+                        default:
+                            val := depend.value[index].%k%
+                    }
+                    vals.Push(val)
                 }
             }
             else {
                 for k in key {
                     vals.Push(k is Func ? k(depend.value) : (depend.value is Map ? depend.value[k] : depend.value.%k%))
                 }
+            }
+        }
+        _traverse_get(keys, target, index := 1) {
+            if (!keys) {
+                return target
+            }
+
+            if (index == keys.Length) {
+                return target is Map ? target[keys[index]] : target.%keys[index]%
+            }
+
+            if (target is Map ? target.Has(keys[index]) : target.HasOwnProp(keys[index])) {
+                return this._traverse_get(keys, target is Map ? target[keys[index]] : target.%keys[index]%, index + 1)
+            }
+        }
+        _traverse_set(keys, target, newValue, index := 1) {
+            if (index == keys.Length) {
+                return target is Map ? target[keys[index]] := newValue : target.%keys[index]% := newValue
+            }
+
+            if (target is Map ? target.Has(keys[index]) : target.HasOwnProp(keys[index])) {
+                return this._traverse_get(keys, target is Map ? target[keys[index]] : target.%keys[index]%, index + 1)
             }
         }
 
@@ -995,7 +1037,13 @@ class Svaner {
                 return
             }
             else if (this.ctrl is Gui.Slider) {
-                this.ctrl.Value := this.depend.value || 0
+                if (this.key is Func) {
+                    f := this.key
+                    this.ctrl.value := f(this.depend.value)
+                }
+                else {
+                    this.ctrl.Value := this._traverse_get(this.key, this.depend.value) || 0
+                }
                 return 
             }
             else if (this.ctrl is Gui.ListView) {
@@ -1041,7 +1089,7 @@ class Svaner {
                 return
             }
             else if (this.ctrl is Gui.DateTime || this.ctrl is Gui.MonthCal) {
-                this.ctrl.Value := signal.value
+                this.ctrl.Value := this._traverse_get(this.key, signal.value)
             }
             else {
                 ; update text label
@@ -1071,7 +1119,16 @@ class Svaner {
 
         bind(delay := 0) {
             try {
-                this.onChange((ctrl, _) => this.depend.set(ctrl.value), delay)
+                if (this.depend.value is Primitive) {
+                    this.onChange((ctrl, _) => this.depend.set(ctrl.value), delay)
+                }
+                else {
+                    new := this.depend.value
+                    this.onChange((ctrl, _) => (
+                        this._traverse_set(this.key, new, ctrl.Value),
+                        this.depend.set(new)
+                    ), delay)
+                }
             }
             catch {
                 targetDepend := this is SvanerCheckBox ? this.checkStatusDepend : this.depend
