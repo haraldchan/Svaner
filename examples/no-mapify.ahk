@@ -59,7 +59,11 @@ NoMapify(App) {
                 "w300 h20", 
                 "name: {1}, pos: {2}, tel: {3}", 
                 staffList, 
+                /**
+                 * keys can be pass in as getters or arrays
+                 */
                 { index: A_Index, keys: ["name", "pos", v => v.contact.tel] }
+                ; { index: A_Index, keys: ["name", "pos", ["contact", "tel"]] }
             )
         )),
 
