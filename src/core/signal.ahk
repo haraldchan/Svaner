@@ -36,9 +36,9 @@ class signal {
         this.asMap := options.HasOwnProp("asMap") ? options.asMap : false
 
         ; initialize value
-        this.value := this.asMap ? this._mapify(initialValue) : initialValue
+        this._value := this.asMap ? this._mapify(initialValue) : initialValue
         this.initValue := this.value
-        this.prevValue := 0
+        this.prevValue := this.value
 
         ; subscribers
         this.subs := []
@@ -61,12 +61,16 @@ class signal {
             this.debugger := DebugUtils.createDebugger(this)
             DebuggerList.addDebugger(this.debugger)
 
-            ; if (InStr(this.debugger.value["fromFile"], "AddReactive\devtools\devtools-ui")) {
+            ; if (InStr(this.debugger._value["fromFile"], "AddReactive\devtools\devtools-ui")) {
             ;     this.debugger := false
             ; } else {
             ;     IsSet(CALL_TREE) && CALL_TREE.addDebugger(this.debugger)
             ; }
         }
+    }
+
+    value {
+        get => this._value
     }
 
     /**
@@ -80,9 +84,9 @@ class signal {
         }
         this.prevValue := this.value
 
-        this.value := newSignalValue is Func ? newSignalValue(this.value) : newSignalValue
+        this._value := newSignalValue is Func ? newSignalValue(this.value) : newSignalValue
         if (this.asMap) {
-            this.value := this._mapify(this.value)
+            this._value := this._mapify(this.value)
         }
 
         ; validates new value if it matches the Struct

@@ -18,6 +18,7 @@ class computed extends signal {
      * doubled := computed(count, c => { doubled: c * 2 }, 
      *   {   
      *      name: "doubled",  ; named signals can be pick up by DevToolsUI
+     *      forceUpdate: true ; triggers subscribers update and effects when set/update was called, even if the value is the same as previous
      *      asMap: true       ; converts object-type value to Map -> Map("num", 1)
      *   }
      * ) 
@@ -30,6 +31,7 @@ class computed extends signal {
 
         ; options
         this.name := options.HasOwnProp("name") ? options.name : ""
+        this.forceUpdate := options.HasOwnProp("forceUpdate") ? options.forceUpdate : false
         this.asMap := options.HasOwnProp("asMap") ? options.asMap : false
         
         this.signal := depend
@@ -62,12 +64,10 @@ class computed extends signal {
                 }
             }
 
-            ; this.value := this._mapify(this.mutation.Call(values*))
-            this.value := this.asMap ? this._mapify(this.mutation.Call(values*)) : this.mutation.Call(values*)
+            this._value := this.asMap ? this._mapify(this.mutation.Call(values*)) : this.mutation.Call(values*)
         } else {
             this.signal.addComp(this)
-            ; this.value := this._mapify(this.mutation.Call(this.signal.value))
-            this.value := this.asMap ? this._mapify(this.mutation.Call(this.signal.value)) : this.mutation.Call(this.signal.value)
+            this._value := this.asMap ? this._mapify(this.mutation.Call(this.signal.value)) : this.mutation.Call(this.signal.value)
         }
 
         ; ; debug mode
@@ -88,6 +88,10 @@ class computed extends signal {
         }
     }
 
+    value {
+        get => this._value
+    }
+
     /**
      * Interface for subscribed signal to sync value to date.
      * @param {signal} subbedSignal subscribed signal
@@ -104,11 +108,9 @@ class computed extends signal {
                     values.Push(s.value)
                 }
             }
-            ; this.value := this._mapify(this.mutation.Call(values*))
-            this.value := this.asMap ? this._mapify(this.mutation.Call(values*)) : this.mutation.Call(values*)
+            this._value := this.asMap ? this._mapify(this.mutation.Call(values*)) : this.mutation.Call(values*)
         } else {
-            ; this.value := this._mapify(this.mutation.Call(subbedSignal.value))
-            this.value := this.asMap ? this._mapify(this.mutation.Call(subbedSignal.value)) : this.mutation.Call(subbedSignal.value)
+            this._value := this.asMap ? this._mapify(this.mutation.Call(subbedSignal.value)) : this.mutation.Call(subbedSignal.value)
         }
 
         ; notify all subscribers to update
