@@ -1114,7 +1114,7 @@ class Svaner {
                 this.ctrl.Text := this._handleFormatStr(this.content, this.depend, this.key)
                 return
             }
-            else if (this.ctrl is Gui.ComboBox || this.ctrl is Gui.DDL) {
+            else if (this.ctrl is Gui.ComboBox || this.ctrl is Gui.DDL || this.ctrl is Gui.ListBox) {
                 ; replace the list content
                 this.ctrl.Delete()
                 this.ctrl.Add(signal.value is Array ? signal.value : MapExt.keys(signal.value))
