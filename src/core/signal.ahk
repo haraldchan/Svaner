@@ -242,11 +242,14 @@ class signal {
 
 
     /**
-     * Interface for AddReactiveControl instances to subscribe.
-     * @param {AddReactive} AddReactiveControl 
+     * Interface for Svaner.Control instances to subscribe.
+     * @param {Svaner.Control} SvanerControl 
      */
-    addSub(AddReactiveControl) {
-        this.subs.Push(AddReactiveControl)
+    addSub(SvanerControl) {
+        if (ArrayExt.find(this.subs, ctrl => ctrl == SvanerControl)) {
+            return
+        }
+        this.subs.Push(SvanerControl)
     }
 
     /**
@@ -254,6 +257,9 @@ class signal {
      * @param {computed} computed 
      */
     addComp(computed) {
+        if (ArrayExt.find(this.comps, comp => comp == computed)) {
+            return
+        }
         this.comps.Push(computed)
     }
 
@@ -262,6 +268,9 @@ class signal {
      * @param {effect} effect
      */
     addEffect(effect) {
+        if (ArrayExt.find(this.effects, e => e.effectFn == effect.effectFn)) {
+            return
+        }
         this.effects.Push(effect)
     }
 
