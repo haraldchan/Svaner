@@ -32,13 +32,15 @@ Counter(App) {
         count.set(c => c + 1)
     }
 
-    return (
-        App.AddText("vcounter @text:align-center w200 h30", "current count: {1}", count),
-        App.AddText("@align[WH]:counter @text:align-center", "doubled count: {1}", doubleCount),
-        App.AddText("@align[WH]:counter @text:align-center", "Sum: {1}", sum),
+    render() {
+        App.AddText("vcounter @text:align-center w200 h30", "current count: {1}", count)
+        App.AddText("@align[WH]:counter @text:align-center", "doubled count: {1}", doubleCount)
+        App.AddText("@align[WH]:counter @text:align-center", "Sum: {1}", sum)
         App.AddButton("@align[WH]:counter", "counter++")
            .onClick(handleIncrement)
-    )
+    }
+    
+    return render()
 }
 
 DevToolsUI()

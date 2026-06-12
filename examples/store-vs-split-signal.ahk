@@ -76,41 +76,43 @@ SVSS(App) {
     triplet := signal({ a: "a", b: "b", c: "c"}, { name: "triplet" })
 
 
-    return (
+    render() {
         ; using store
         ; date
-        App.AddDateTime("vdate-state", "yyyy-MM-dd").onChange(handleDateUpdate),
+        App.AddDateTime("vdate-state", "yyyy-MM-dd").onChange(handleDateUpdate)
         ; search
         App.AddDDL("vsearch-state x+10 w80 Choose2", searchByMap.keys())
-           .onChange(handleSearchUpdate),
+           .onChange(handleSearchUpdate)
         ; range
-        App.AddText("x+10 h25 0x200", "最近"),
-        App.AddText("x+1 h25 0x200", "分钟"),
-        App.AddEdit("vrange-state Number x+1 w30 h25", "{1}", queryFilterStore.range).onChange(handleRangeUpdate),
+        App.AddText("x+10 h25 0x200", "最近")
+        App.AddText("x+1 h25 0x200", "分钟")
+        App.AddEdit("vrange-state Number x+1 w30 h25", "{1}", queryFilterStore.range).onChange(handleRangeUpdate)
 
         ; using signal
         ; date
-        App.AddDateTime("vdate @align[x]:date-state y+5", "yyyy-MM-dd", standAloneDate).bind(),
+        App.AddDateTime("vdate @align[x]:date-state y+5", "yyyy-MM-dd", standAloneDate).bind()
         ; search
         App.AddDDL("vsearch x+10 w80 Choose2", searchByMap.keys())
-           .onChange(handleQueryFilterSignalUpdate),
+           .onChange(handleQueryFilterSignalUpdate)
         ; range
-        App.AddText("x+10 h25 0x200", "最近"),
+        App.AddText("x+10 h25 0x200", "最近")
         /**
          * notice difference of parameter:key.
          * if you use a function as key, it's just a getter and cannot use `bind`, you have to use `onChange`.
          * while using Array<key>, SvanerControl can use it to track the property, so use `bind` for two-way binding.
          */
-        ; App.AddSlider("vrange x+1 w100 h25 ToolTip TickInterval Range-0-100", queryFilter, v => v.range).onChange(handleQueryFilterSignalUpdate),
-        App.AddSlider("vrange x+1 w100 h25 ToolTip TickInterval Range-0-100", queryFilter, ["range"]).bind(),
-        App.AddText("x+1 h25 0x200", "分钟"),
+        ; App.AddSlider("vrange x+1 w100 h25 ToolTip TickInterval Range-0-100", queryFilter, v => v.range).onChange(handleQueryFilterSignalUpdate)
+        App.AddSlider("vrange x+1 w100 h25 ToolTip TickInterval Range-0-100", queryFilter, ["range"]).bind()
+        App.AddText("x+1 h25 0x200", "分钟")
 
 
         ; binders
-        App.AddEdit("@align[x]:date-state y+5 w80", "{1}", triplet, ["a"]).bind(),
-        App.AddEdit("w80 x+5", "{1}", triplet, ["b"]).bind(),
+        App.AddEdit("@align[x]:date-state y+5 w80", "{1}", triplet, ["a"]).bind()
+        App.AddEdit("w80 x+5", "{1}", triplet, ["b"]).bind()
         App.AddEdit("w80 x+5", "{1}", triplet, ["c"]).bind()
-    )
+    }
+
+    render()
 }
 
 DevToolsUI()

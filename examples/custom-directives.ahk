@@ -36,11 +36,12 @@ CustomDirectives(App) {
         ctrl.onClick((*) => ctrl.SetFont("cGreen", "Verdana"))
     }
 
-    return (
-        App.AddText("vfirst-text w200 h30 @text:align-center @use:red-text", "Using red-text"),
-        App.AddText("@use:combination @use:blue-text", "Using callback blue-text"),
-        App.AddText("@use:combination @use:greenify", "Click to green!"),
-        App.AddText("@use:nested-comb", "Directive Combination"),
-        0
-    )
+    render() {
+        App.AddText("vfirst-text w200 h30 @text:align-center @use:red-text", "Using red-text")
+        App.AddText("@use:combination @use:blue-text", "Using callback blue-text")
+        App.AddText("@use:combination @use:greenify", "Click to green!")
+        App.AddText("@use:nested-comb", "Directive Combination")
+    }
+        
+    return render()
 }

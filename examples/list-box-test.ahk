@@ -31,8 +31,10 @@ ListBoxTest(App) {
 
 
 
-    return (
+    render() {
         ; App.AddListBox("", ["a", "b", "c"]).onChange(showListItem)
         App.AddListBox("vlb", list).onChange(showListItem)
-    )
+    }
+    
+    return render()
 }

@@ -40,9 +40,9 @@ NewSvanerControl(App) {
         dateTime.set(ctrl.Value)
     }
 
-    return (
+    render() {
         ; clearer link
-        App.AddLink("w300 h25", "This is a {1}", { text: "link", href: "https://www.autohotkey.com"}),
+        App.AddLink("w300 h25", "This is a {1}", { text: "link", href: "https://www.autohotkey.com"})
         App.AddLink(
             "w300 h25", 
             "Click to run {1} or open {2}", 
@@ -50,15 +50,16 @@ NewSvanerControl(App) {
                 { text: "Notepad", id: "notepad", href: "notepad" }, 
                 { text: "online help", id: "help", href: "https://www.autohotkey.com/docs/" }
             ]
-        ).onClick(linkClick),
+        ).onClick(linkClick)
 
         ; slider
-        App.AddEdit("w300 h25 Number", "{1}", sliderVal).onChange(handleSliderValUpdate),
-        App.AddSlider("ToolTip TickInterval Range-10-10 w300 h25", sliderVal).onChange(handleSliderValUpdate),
+        App.AddEdit("w300 h25 Number", "{1}", sliderVal).onChange(handleSliderValUpdate)
+        App.AddSlider("ToolTip TickInterval Range-10-10 w300 h25", sliderVal).onChange(handleSliderValUpdate)
 
         ; DateTime/MonthCal
-        App.AddDateTime("","yyyy/MM/dd HH:ss", dateTime).onChange(handleDateTimeUpdate),
-        App.AddMonthCal("vcalendar", dateTime).onChange(handleDateTimeUpdate),
-        0
-    )
+        App.AddDateTime("","yyyy/MM/dd HH:ss", dateTime).onChange(handleDateTimeUpdate)
+        App.AddMonthCal("vcalendar", dateTime).onChange(handleDateTimeUpdate)
+    }
+
+    return render()
 }

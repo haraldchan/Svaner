@@ -56,7 +56,7 @@ StructTypes(App) {
 
     isShow := signal(false)
 
-    return (
+    render() {
         App.AddListView(
             { lvOptions: "vstaff-list w250 r6 @lv:label-tip" },
             { 
@@ -64,7 +64,7 @@ StructTypes(App) {
                 widths: [80, 80, 80]
             },
             staffList
-        ),
+        )
         Show(() => StackBox(App,
             {
                 name: "add-new-staff",
@@ -83,7 +83,9 @@ StructTypes(App) {
                 App.AddEdit("vnew-age x+10 w165", ""),
                 App.AddButton("xs155 yp+30 w80 h25", "Add").onClick(handleAddNewStaff)
             ]
-        ), isShow, s => s == true),
+        ), isShow, s => s == true)
         App.AddCheckBox("w100 h20", "toggle show", { text: isShow, check: isShow }).bind()
-    )
+    }
+    
+    return render()
 }

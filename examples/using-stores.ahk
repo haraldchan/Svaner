@@ -40,11 +40,11 @@ UsingStores(App) {
         }
     })
 
-    return (
-        App.AddText("w200 h25", "count: {1}", count),
-        App.AddText("w200 h25", "doubled: {1}", doubled),
+    render() {
+        App.AddText("w200 h25", "count: {1}", count)
+        App.AddText("w200 h25", "doubled: {1}", doubled)
 
-        App.AddButton("w200 h25", "count++").onClick((*) => count.set(n => n + 1)),
+        App.AddButton("w200 h25", "count++").onClick((*) => count.set(n => n + 1))
         App.AddButton("w200 h25", "Method Add").onClick((*) => showAdd("sum: "))
 
         ; without using unpack
@@ -53,7 +53,9 @@ UsingStores(App) {
 
         ; App.AddButton("w200 h25", "count++").onClick((*) => countStore.count.set(n => n + 1)),
         ; App.AddButton("w200 h25", "Method Add").onClick((*) => countStore.useMethod("showAdd")("sum: "))
-    )
+    }
+    
+    return render()
 }
 
 DevToolsUI()

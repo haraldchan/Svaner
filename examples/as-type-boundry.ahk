@@ -31,12 +31,14 @@ AsTypeBoundry(App) {
         }
     }
 
-    return (
-        App.AddText("vadmin w200 h30", "Current Admin: {1}", admin),
-        App.AddEdit("vnew-admin @align[WH]:admin", ""),
+    render() {
+        App.AddText("vadmin w200 h30", "Current Admin: {1}", admin)
+        App.AddEdit("vnew-admin @align[WH]:admin", "")
         App.AddButton("@align[WH]:admin", "set new admin")
            .onClick(handleSetNewAdmin)
-    )
+    }
+    
+    return render()
 }
 
 ; DevToolsUI()

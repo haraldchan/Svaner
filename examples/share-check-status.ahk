@@ -71,9 +71,9 @@ SCS(App) {
         )
     }
 
-    return (
-        App.AddCheckBox("vselect-all w250", "Select all"),
-        ; App.AddCheckBox("vselect-all w250", "Select all", { check: isSelectAll }),
+    render() {
+        App.AddCheckBox("vselect-all w250", "Select all")
+        ; App.AddCheckBox("vselect-all w250", "Select all", { check: isSelectAll })
         App.AddListView(
             { 
                 lvOptions: "vstaff-list w250 r10 @lv:label-tip Checked",
@@ -83,7 +83,7 @@ SCS(App) {
                 widths: [80, 80, 80]
             },
             staffList
-        ),
+        )
         StackBox(App,
             {
                 name: "add-new-staff",
@@ -103,7 +103,9 @@ SCS(App) {
                 App.AddButton("xs65 yp+30 w80 h25", "Checked Rows").onClick(showCheckedRows),
                 App.AddButton("x+10 w80 h25", "Add").onClick(handleAddNewStaff)
             ]
-        ),
+        )
         onMount()
-    )
+    }
+
+    return render()
 }

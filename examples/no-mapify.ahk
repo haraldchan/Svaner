@@ -47,12 +47,12 @@ NoMapify(App) {
         staffList.update(staffList.value.findIndex(item => item.name == "amy"), newAmyInfo)
     }
 
-    return (
-        App.AddText("vcounter @text:align-center w200 h30", "current count: {1}", count),
-        App.AddText("@align[WH]:counter @text:align-center", "doubled count: {1}", doubleCount),
-        App.AddText("@align[WH]:counter @text:align-center", "Sum: {1}", sum),
+    render() {
+        App.AddText("vcounter @text:align-center w200 h30", "current count: {1}", count)
+        App.AddText("@align[WH]:counter @text:align-center", "doubled count: {1}", doubleCount)
+        App.AddText("@align[WH]:counter @text:align-center", "Sum: {1}", sum)
         App.AddButton("@align[WH]:counter", "counter++")
-           .onClick(handleIncrement),
+           .onClick(handleIncrement)
         
         staffList.value.map(staff => (
             App.AddText(
@@ -65,10 +65,12 @@ NoMapify(App) {
                 { index: A_Index, keys: ["name", "pos", v => v.contact.tel] }
                 ; { index: A_Index, keys: ["name", "pos", ["contact", "tel"]] }
             )
-        )),
+        ))
 
         App.AddButton("w200 h20", "update amy").onClick(updateAmy)
-    )
+    }
+
+    return render()
 }
 
 DevToolsUI()

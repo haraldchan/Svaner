@@ -25,8 +25,10 @@ Debouncer(App) {
         content.set(ctrl.value)
     }
 
-    return (
-        App.AddEdit("w200 h100 Wrap ReadOnly", "{1}", content),
+    render() {
+        App.AddEdit("w200 h100 Wrap ReadOnly", "{1}", content)
         App.AddEdit("w200 h20 Wrap", "{1}", content).onChange(handleValueUpdate, 300)
-    )
+    }
+
+    return render()
 }

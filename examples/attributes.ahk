@@ -34,15 +34,17 @@ Attributes(App) {
         radios.forEach(radio => radio.onClick(hanleSetSelectedRadio))
     }
 
-    return (
-        App.AddText("w200 h40", "selected: {1}", selectedRadio),
+    render() {
+        App.AddText("w200 h40", "selected: {1}", selectedRadio)
         
         ; add attributes by using "#<key>=<value>"
-        App.AddRadio("w100 h20 #radio-group=first", "first radio"),
+        App.AddRadio("w100 h20 #radio-group=first", "first radio")
         ; value is optional. default value is a empty string.
-        App.AddRadio("w100 h20 #radio-group", "second radio"),
-        App.AddRadio("w100 h20 #radio-group", "third radio"),
-        App.AddRadio("w100 h20 #radio-group", "fourth radio"),
+        App.AddRadio("w100 h20 #radio-group", "second radio")
+        App.AddRadio("w100 h20 #radio-group", "third radio")
+        App.AddRadio("w100 h20 #radio-group", "fourth radio")
         onMount()
-    )
+    }
+    
+    return render()
 }

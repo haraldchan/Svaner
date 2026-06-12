@@ -30,10 +30,12 @@ UsingChildren(App) {
         3, Parent_3
     )
 
-    return (
-        Dynamic(App, c, cComponents, { style: "w200 h25", blue: " cBlue " }),
+    render() {
+        Dynamic(App, c, cComponents, { style: "w200 h25", blue: " cBlue " })
         App.AddSlider("w200 y+100 range1-3", c).onChange((ctrl, _) => c.set(ctrl.Value))
-    )
+    }
+    
+    return render()
 }
 
 Parent_1(App, props) {
