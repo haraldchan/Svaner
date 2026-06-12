@@ -106,15 +106,15 @@ class Svaner {
                 case StringExt.startsWith(ctrlSearchCondition, "type:"):
                     return GuiExt.getCtrlByType(this.gui, StrReplace(ctrlSearchCondition, "type:", ""))
 
-                ; by type all
+                    ; by type all
                 case StringExt.startsWith(ctrlSearchCondition, "typeAll:"):
                     return GuiExt.getCtrlByTypeAll(this.gui, StrReplace(ctrlSearchCondition, "typeAll:", ""))
 
-                ; search component
+                    ; search component
                 case StringExt.startsWith(ctrlSearchCondition, "component:"):
                     return this.components[StrReplace(ctrlSearchCondition, "component:")]
-                
-                ; by attribute
+
+                    ; by attribute
                 case (StringExt.startsWith(ctrlSearchCondition, "#") && !InStr(ctrlSearchCondition, "=")):
                     attr := pipe(
                         res => StrReplace(res, "#", "", , , 1),
@@ -122,8 +122,8 @@ class Svaner {
                     )(ctrlSearchCondition)
 
                     return GuiExt.getCtrlsByMatch(this.gui, ctrl => ctrl.attributes.HasOwnProp(attr))
-                
-                ; by attribute with matched value
+
+                    ; by attribute with matched value
                 case (StringExt.startsWith(ctrlSearchCondition, "#") && InStr(ctrlSearchCondition, "=")):
                     pair := pipe(
                         res => StrReplace(res, "#", "", , , 1),
@@ -135,7 +135,7 @@ class Svaner {
                         ctrl => ctrl.attributes.HasOwnProp(StringExt.toCase(pair[1], "kebab")) && ctrl.attributes.%pair[1]% == pair[2]
                     )
 
-                ; by name(same as Gui.__Item)
+                    ; by name(same as Gui.__Item)
                 default:
                     return GuiExt.getCtrlByName(this.gui, ctrlSearchCondition)
             }
@@ -151,7 +151,7 @@ class Svaner {
     __parseOptions(optionString) {
         if (!InStr(optionString, "@") && !InStr(optionString, "#")) {
             return {
-                parsed: (this.devOpt.HasOwnProp("border") && this.devOpt.border == true) ? optionString . " Border " : optionString, 
+                parsed: (this.devOpt.HasOwnProp("border") && this.devOpt.border == true) ? optionString . " Border " : optionString,
                 callbacks: [],
                 attributes: {}
             }
@@ -187,8 +187,8 @@ class Svaner {
             }
         }
 
-        return { 
-            parsed: (this.devOpt.HasOwnProp("border") && this.devOpt.border == true) ? parsed . " Border " : parsed, 
+        return {
+            parsed: (this.devOpt.HasOwnProp("border") && this.devOpt.border == true) ? parsed . " Border " : parsed,
             callbacks: optCallbacks,
             attributes: attributes
         }
@@ -331,7 +331,7 @@ class Svaner {
     AddDateTime(options, dateFormat := "yyyy/MM/dd", depend?, key?) {
         parsedOptions := this.__parseOptions(options)
 
-        control := IsSet(depend) 
+        control := IsSet(depend)
             ? SvanerDateTime(this.gui, parsedOptions.parsed, dateFormat, depend, (IsSet(key) ? key : 0))
             : this.gui.AddDateTime(parsedOptions.parsed, dateFormat)
         this.__applyCallbackAndAttributes(control, parsedOptions.callbacks, parsedOptions.attributes)
@@ -365,8 +365,8 @@ class Svaner {
      * @returns {SvanerDropDownList | Gui.DDL} 
      */
     AddDDL(options, listOrDepend, key?) => this.AddDropDownList(options, listOrDepend, IsSet(key) ? key : 0)
-    
-    
+
+
     /**
      * Add a Edit/SvanerEdit control to Gui.
      * @param {String} options Options/Directives apply to the control.
@@ -438,7 +438,7 @@ class Svaner {
             if (linkInfo.base == Object.Prototype) {
                 anchorEl := Format(a, linkInfo.text, linkInfo.href, linkInfo.HasOwnProp("id") ? linkInfo.id : "")
                 linkText := Format(text, anchorEl)
-            } 
+            }
             else if (linkInfo is Array) {
                 anchorEls := []
                 for info in linkInfo {
@@ -468,7 +468,7 @@ class Svaner {
         parsedOptions := this.__parseOptions(options)
 
         control := listOrDepend is signal
-            ? SvanerListBox(this.gui, parsedOptions.parsed,, listOrDepend)
+            ? SvanerListBox(this.gui, parsedOptions.parsed, , listOrDepend)
             : this.gui.AddListBox(parsedOptions.parsed, listOrDepend)
         this.__applyCallbackAndAttributes(control, parsedOptions.callbacks, parsedOptions.attributes)
 
@@ -491,17 +491,17 @@ class Svaner {
             parsedItemOptions := options.HasOwnProp("itemOptions")
                 ? this.__parseOptions(options.itemOptions)
                 : { parsed: "", callbacks: [] }
-        } 
+        }
         else {
             ; Native ListView
-            parsedOptions := this.__parseOptions(options)
+            parsedLvOptions := this.__parseOptions(options)
         }
 
         control := IsSet(depend) && depend is signal
             ? SvanerListView(
                 this.gui, { lvOptions: parsedLvOptions.parsed, itemOptions: parsedItemOptions.parsed },
                 columnDetailsOrList, depend, (IsSet(key) ? key : 0))
-            : this.gui.AddListView(parsedOptions.parsed, columnDetailsOrList)
+            : this.gui.AddListView(parsedLvOptions.parsed, columnDetailsOrList)
 
         if (control is SvanerListView && (parsedLvOptions.callbacks || parsedItemOptions.callbacks)) {
             callbacks := ArrayExt.append(parsedLvOptions.callbacks, parsedItemOptions.callbacks)
@@ -810,7 +810,7 @@ class Svaner {
                 default:
                     this.ctrl := this.GuiObject.Add(this.ctrlType, this.options, this.formattedContent)
             }
-            
+
             this.ctrl.svanerWrapper := this
 
             ; add subscribe
@@ -937,7 +937,7 @@ class Svaner {
             if (key.base == Object.Prototype) {
                 index := key.HasOwnProp("index") ? key.index : A_Index
 
-                for k in key.keys {                    
+                for k in key.keys {
                     val := ""
                     switch {
                         case (k is Func):
@@ -1089,7 +1089,7 @@ class Svaner {
                 else {
                     this.ctrl.Value := this._traverse_get(this.key, this.depend.value) || 0
                 }
-                return 
+                return
             }
             else if (this.ctrl is Gui.ListView) {
                 ; update from checkStatusDepend
@@ -1114,7 +1114,7 @@ class Svaner {
                 this.ctrl.Text := this._handleFormatStr(this.content, this.depend, this.key)
                 return
             }
-            else if (this.ctrl is Gui.ComboBox || this.ctrl is Gui.DDL || this.ctrl is Gui.ListBox) {
+            else if (this.ctrl is Gui.ComboBox || this.ctrl is Gui.DDL) {
                 ; replace the list content
                 this.ctrl.Delete()
                 this.ctrl.Add(signal.value is Array ? signal.value : MapExt.keys(signal.value))
