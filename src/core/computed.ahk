@@ -46,6 +46,7 @@ class computed extends signal {
         ; debugger
         this.debugger := false
 
+        values := []
         if (this.signal is Array) {
             for s in this.signal {
                 s.addComp(this)
@@ -55,7 +56,6 @@ class computed extends signal {
                 ? this.mutation.MaxParams
                 : Mod(this.mutation.MaxParams, this.signal.Length)
             
-            values := []
             for s in this.signal {
                 if (A_Index <= this.insertPrevCount) {
                     values.Push(s.prevValue, s.value)
@@ -63,14 +63,21 @@ class computed extends signal {
                     values.Push(s.value)
                 }
             }
-
-            this._value := this.asMap ? this._mapify(this.mutation.Call(values*)) : this.mutation.Call(values*)
-        } else {
+        } 
+        else {
             this.signal.addComp(this)
-            this._value := this.asMap ? this._mapify(this.mutation.Call(this.signal.value)) : this.mutation.Call(this.signal.value)
+
+            if (this.mutation.MaxParams == 2) {
+                values.Push(this.signal.prevValue, this.signal.value)
+            }
+            else {
+                values.Push(this.signal.value)
+            }
         }
 
-        ; ; debug mode
+        this._value := this.asMap ? this._mapify(this.mutation.Call(values*)) : this.mutation.Call(values*)
+
+        ; debug mode
         if (!IsSet(DebugUtils) && !IsSet(debugger)) {
             return
         }
@@ -97,20 +104,30 @@ class computed extends signal {
      * @param {signal} subbedSignal subscribed signal
      */
     sync(subbedSignal) {
+        if (!this.forceUpdate && subbedSignal.value == this.value) {
+            return
+        }
         this.prevValue := this.value
 
+        values := []
         if (this.signal is Array) {
-            values := []
             for s in this.signal {
                 if (A_Index <= this.insertPrevCount) {
-                    values.Push(s.prevValue, s.value)
+                    values.Push(s.value, s.prevValue)
                 } else {
                     values.Push(s.value)
                 }
             }
+        }
+        else {
+            if (this.mutation.MaxParams == 2) {
+                values.Push(subbedSignal.prevValue, subbedSignal.value)
+            }
+            else {
+                values.Push(subbedSignal.value)
+            }
+
             this._value := this.asMap ? this._mapify(this.mutation.Call(values*)) : this.mutation.Call(values*)
-        } else {
-            this._value := this.asMap ? this._mapify(this.mutation.Call(subbedSignal.value)) : this.mutation.Call(subbedSignal.value)
         }
 
         ; notify all subscribers to update
@@ -150,8 +167,11 @@ class computed extends signal {
      * Interface for AddReactiveControl instances to subscribe.
      * @param {AddReactive} AddReactiveControl 
      */
-    addSub(AddReactiveControl) {
-        this.subs.Push(AddReactiveControl)
+    addSub(SvanerControl) {
+        if (ArrayExt.find(this.subs, ctrl => ctrl == SvanerControl)) {
+            return
+        }
+        this.subs.Push(SvanerControl)
     }
 
     /**
@@ -159,6 +179,9 @@ class computed extends signal {
      * @param {computed} computed 
      */
     addComp(computed) {
+        if (ArrayExt.find(this.comps, comp => comp == computed)) {
+            return
+        }
         this.comps.Push(computed)
     }
 
@@ -167,6 +190,9 @@ class computed extends signal {
      * @param {effect} effect
      */
     addEffect(effect) {
+        if (ArrayExt.find(this.effects, e => e.effectFn == effect.effectFn)) {
+            return
+        }
         this.effects.Push(effect)
     }
 }
